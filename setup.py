@@ -5,6 +5,9 @@ setup(
     version='0.0.1',
     packages=[
         'houttuynia',
+        'houttuynia.datasets',
+        'houttuynia.models',
+        'houttuynia.nn',
     ],
     url='',
     license='MIT',
