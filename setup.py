@@ -5,7 +5,6 @@ setup(
     version='0.0.1',
     packages=[
         'houttuynia',
-        'houttuynia.init',
     ],
     url='',
     license='MIT',
