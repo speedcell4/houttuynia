@@ -9,7 +9,13 @@ setup(
         'houttuynia.nn',
     ],
     install_requires=[
+        'torch>=0.4.0',
         'tqdm',
+        'numpy',
+        'sklearn',
+        'matplotlib',
+        'logbook',
+        'tensorboardX',
     ],
     url='',
     license='MIT',

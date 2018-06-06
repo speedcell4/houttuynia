@@ -20,9 +20,3 @@ def prepare_iris_dataset(batch_size: int, shuffle: int = True, ratio: float = 0.
     _test_dataset = TensorDataset(data[test_indexes], target[test_indexes])
     return DataLoader(_train_dataset, batch_size=batch_size, shuffle=shuffle), \
            DataLoader(_test_dataset, batch_size=_test_dataset.__len__(), shuffle=False)
-
-
-import re
-
-ans = re.split(r'(@@)?\s+', 'ths@@ is nice@@ work',)
-print(ans)

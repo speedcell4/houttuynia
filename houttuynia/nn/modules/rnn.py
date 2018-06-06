@@ -1,6 +1,6 @@
 from torch import nn
 
-from .init import keras_lstm_
+from houttuynia.nn.init import keras_lstm_
 
 __all__ = [
     'LSTM', 'LSTMCell',
