@@ -7,7 +7,7 @@ __all__ = [
     'StartWatch', 'StopWatch',
 ]
 
-attr_string: str = r'_watch_{key}'
+attr_format: str = r'_watch_{key}'
 
 
 class StartWatch(Extension):
@@ -16,9 +16,11 @@ class StartWatch(Extension):
         self.key = key
 
     def __call__(self, schedule: 'Schedule') -> None:
-        current = datetime.now()
-        logging.notice(f'{self.key}-{getattr(schedule, self.key)} start => {current}')
-        return setattr(schedule, attr_string.format(key=self.key), current)
+        attr_key = attr_format.format(key=self.key)
+        value = getattr(schedule, self.key)
+        tm = datetime.now()
+        logging.notice(f'{self.key}-{value} start => {tm}')
+        return setattr(schedule, attr_key, tm)
 
 
 class StopWatch(Extension):
@@ -27,6 +29,8 @@ class StopWatch(Extension):
         self.key = key
 
     def __call__(self, schedule: 'Schedule') -> None:
-        timedelta = getattr(schedule, attr_string.format(key=self.key)) - datetime.now()
-        logging.notice(f'{self.key}-{getattr(schedule, self.key)} finished, time elapsed => {timedelta}')
-        return delattr(schedule, attr_string.format(key=self.key))
+        attr_key = attr_format.format(key=self.key)
+        value = getattr(schedule, self.key)
+        tm = datetime.now() - getattr(schedule, attr_key)
+        logging.notice(f'{self.key}-{value} finished, time elapsed => {tm}')
+        return delattr(schedule, attr_key)
