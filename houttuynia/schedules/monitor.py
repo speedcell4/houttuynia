@@ -4,7 +4,18 @@ from typing import List, MutableMapping
 import torch
 from tensorboardX import SummaryWriter
 
-from houttuynia import config
+import numpy as np
+from numpy.random import RandomState
+from matplotlib import pyplot as plt
+
+import torch
+from torch.nn import init
+from torch.nn import functional as F
+from torch.autograd import Variable
+from torch.utils.data import Dataset, DataLoader
+from torch import nn, cuda, initial_seed, autograd, optim
+
+import houttuynia as ho
 
 
 class Monitor(object):
@@ -29,7 +40,7 @@ class InMemoryMonitor(Monitor):
 
     def report_scalars(self, *, chapter: str = None, global_step: int = None, **values) -> None:
         if chapter is None:
-            chapter = config['chapter']
+            chapter = ho.config['chapter']
         for name, value in values.items():
             if torch.is_tensor(value):
                 value = value.item()
@@ -44,7 +55,7 @@ class TensorboardMonitor(Monitor):
 
     def report_scalars(self, *, chapter: str = None, global_step: int = None, **values) -> None:
         if chapter is None:
-            chapter = config['chapter']
+            chapter = ho.config['chapter']
         tag_scalar_dict = {
             name: value.item() if torch.is_tensor(value) else value
             for name, value in values.items()

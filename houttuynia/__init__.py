@@ -1,9 +1,11 @@
 import random
 
+from torch import Tensor
+import numpy as np
 import torch
 from torch import nn
-import numpy as np
-from torch import Tensor
+
+from . import logging
 
 
 class Configuration(dict):
@@ -18,6 +20,7 @@ class Configuration(dict):
 
 
 config = Configuration(
+    handler=logging.push_stream_handler(),
     device=torch.device('cpu'),
     chapter='train',
 )
