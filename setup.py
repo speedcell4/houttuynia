@@ -5,9 +5,12 @@ setup(
     version='0.0.1',
     packages=[
         'houttuynia',
+        'houttuynia.transformers',
         'houttuynia.datasets',
-        'houttuynia.models',
         'houttuynia.nn',
+    ],
+    install_requires=[
+        'tqdm',
     ],
     url='',
     license='MIT',
