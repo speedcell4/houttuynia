@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import torch
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 from torch import nn, optim
 import logbook as log
@@ -76,9 +77,9 @@ class Schedule(object):
         return self.optimizer.step()
 
     def train(self, data_loader: DataLoader, num_epochs: int):
-        for _ in range(num_epochs):
+        for _ in tqdm(range(num_epochs), desc='train', unit='epoch'):
             self.before_epoch()
-            for batch in data_loader:
+            for batch in tqdm(data_loader, desc='batch', unit='batch'):
                 self.before_iteration()
                 self.module.train()
                 self.accumulated_loss = self.module(batch)

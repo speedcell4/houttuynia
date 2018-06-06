@@ -2,11 +2,8 @@ import random
 
 import torch
 from torch import cuda
+from torch.nn import Module
 import numpy as np
-
-from . import datasets
-from . import models
-from . import nn
 
 
 def manual_seed(seed: int):
@@ -33,48 +30,10 @@ config = Configuration(
 )
 
 
-def i8_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.int8)
-
-
-def i16_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.int16)
-
-
-def i32_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.int)
-
-
-def i64_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.long)
-
-
-def u8_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.uint8)
-
-
-def u16_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.uint16)
-
-
-def u32_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.uint)
-
-
-def u64_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.ulong)
-
-
-def f16_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.float16)
-
-
-def f32_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.float32)
-
-
-def f64_tensor(tensor):
-    return torch.tensor(tensor, device=config.device, dtype=torch.float64)
+def to_device(device_id: str, *moduels: Module):
+    config['device'] = torch.device(device_id)
+    for module in moduels:
+        module.to(config['device'])
 
 
 def using_config(**kwargs):
