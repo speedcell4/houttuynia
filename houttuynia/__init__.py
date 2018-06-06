@@ -1,16 +1,9 @@
 import random
 
 import torch
-from torch import cuda
-from torch.nn import Module
+from torch import nn
 import numpy as np
-
-
-def manual_seed(seed: int):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    cuda.manual_seed_all(seed)
+from torch import Tensor
 
 
 class Configuration(dict):
@@ -25,12 +18,19 @@ class Configuration(dict):
 
 
 config = Configuration(
-    chapter='train',
     device=torch.device('cpu'),
+    chapter='train',
 )
 
 
-def to_device(device_id: str, *moduels: Module):
+def manual_seed(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+
+def to_device(device_id: str, *moduels: nn.Module) -> None:
     config['device'] = torch.device(device_id)
     for module in moduels:
         module.to(config['device'])
@@ -44,3 +44,54 @@ def using_config(**kwargs):
         yield
     finally:
         config = old_config
+
+
+# tensor type definitions
+
+def i8_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.i8)
+
+
+def i16_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.i16)
+
+
+def i32_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.i32)
+
+
+def i64_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.i64)
+
+
+def u8_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.u8)
+
+
+def u16_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.u16)
+
+
+def u32_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.u32)
+
+
+def u64_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.u64)
+
+
+def f16_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.f16)
+
+
+def f32_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.f32)
+
+
+def f64_tensor(tensor) -> Tensor:
+    return torch.tensor(tensor, device=config['device'], dtype=torch.f64)
+
+
+byte_tensor = u8_tensor
+long_tensor = i64_tensor
+float_tensor = f32_tensor

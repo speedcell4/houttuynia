@@ -22,7 +22,8 @@ class Highway(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        gain = init.calculate_gain(self.sigmoid.__class__.__name__.lower())
+        nonlinearity = self.sigmoid.__class__.__name__.lower()
+        gain = init.calculate_gain(nonlinearity)
 
         init.xavier_uniform_(self.transform.weight, 1.0)
         init.xavier_uniform_(self.carry.weight, gain)
