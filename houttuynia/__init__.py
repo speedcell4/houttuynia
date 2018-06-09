@@ -1,5 +1,6 @@
 import random
 from contextlib import contextmanager
+from functools import wraps
 
 from torch import Tensor
 import torch
@@ -32,6 +33,17 @@ def manual_seed(seed: int) -> None:
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+
+
+def unwrap_chapter(func):
+    @wraps(func)
+    def wrapper(*args, chapter=None, **kwargs):
+        if chapter is None:
+            chapter = config['chapter']
+
+        return func(*args, chapter=chapter, **kwargs)
+
+    return wrapper
 
 
 def to_device(device_id: str, *moduels: nn.Module) -> None:

@@ -6,6 +6,7 @@ from torch import nn, optim
 from houttuynia.monitors import TensorboardMonitor
 from houttuynia.schedules import EpochalSchedule
 from houttuynia.nn import Classifier
+from houttuynia import to_device
 from houttuynia.datasets import prepare_iris_dataset
 from houttuynia.schedule import Moment, Pipeline
 from houttuynia.extensions import CommitScalarByMean, Evaluation
@@ -33,7 +34,7 @@ app = aku.App(__file__)
 
 
 @app.register
-def train(hidden_features: int = 100, bias: bool = True, negative_slope: float = 0.2,
+def train(hidden_features: int = 100, bias: bool = True, negative_slope: float = 0.2, device: str = 'cpu',
           batch_size: int = 1, num_epochs: int = 50, log_dir: Path = Path('log_dir')):
     train, test = prepare_iris_dataset(batch_size)
 
@@ -43,6 +44,8 @@ def train(hidden_features: int = 100, bias: bool = True, negative_slope: float =
     )
     optimizer = optim.Adam(estimator.parameters())
     monitor = TensorboardMonitor(log_dir=log_dir)
+
+    to_device(device, estimator)
 
     schedule = EpochalSchedule(estimator, optimizer, monitor)
     schedule.register_extension(Periodic(Moment.AFTER_ITERATION, iteration=5))(CommitScalarByMean(

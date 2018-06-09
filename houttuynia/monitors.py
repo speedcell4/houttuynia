@@ -14,17 +14,6 @@ __all__ = [
 ]
 
 
-def unwrap_chapter(func):
-    @wraps(func)
-    def wrapper(*args, chapter=None, **kwargs):
-        if chapter is None:
-            chapter = config['chapter']
-
-        return func(*args, chapter=chapter, **kwargs)
-
-    return wrapper
-
-
 class Monitor(object):
     def __init__(self) -> None:
         self.memory: Dict[Tuple[str, str], List[float]] = {}

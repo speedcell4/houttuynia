@@ -6,6 +6,7 @@ setup(
     packages=[
         'houttuynia',
         'houttuynia.datasets',
+        'houttuynia.examples',
         'houttuynia.extensions',
         'houttuynia.nn',
     ],
