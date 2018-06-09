@@ -6,6 +6,7 @@ setup(
     packages=[
         'houttuynia',
         'houttuynia.datasets',
+        'houttuynia.extensions',
         'houttuynia.nn',
     ],
     install_requires=[

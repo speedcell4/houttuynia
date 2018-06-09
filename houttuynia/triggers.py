@@ -18,8 +18,3 @@ class Periodic(Trigger):
             if getattr(schedule, key) % interval != 0:
                 return False
         return True
-
-
-class Once(Trigger):
-    def __init__(self, moment: Moment, **intervals) -> None:
-        super(Once, self).__init__(moment)
