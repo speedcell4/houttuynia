@@ -1,29 +1,28 @@
-from enum import IntEnum
+import enum
 from typing import List, Tuple
 
-from torch.utils.data import DataLoader
-from torch import nn, optim
+from .monitors import Monitor
+from .nn import Architecture
 
-from .monitor import Monitor
-
-__all__ = ['Moment', 'Trigger', 'Extension', 'Schedule']
+__all__ = ['Moment', 'Trigger', 'Extension', 'Pipeline', 'Schedule']
 
 
-class Moment(IntEnum):
-    BEFORE_RUN: int = 1
-    AFTER_RUN: int = 2
+@enum.unique
+class Moment(enum.IntEnum):
+    BEFORE_RUN: int = enum.auto()
+    AFTER_RUN: int = enum.auto()
 
-    BEFORE_EPOCH: int = 3
-    AFTER_EPOCH: int = 4
+    BEFORE_EPOCH: int = enum.auto()
+    AFTER_EPOCH: int = enum.auto()
 
-    BEFORE_EPISODE: int = 5
-    AFTER_EPISODE: int = 6
+    BEFORE_EPISODE: int = enum.auto()
+    AFTER_EPISODE: int = enum.auto()
 
-    BEFORE_ITERATION: int = 7
-    AFTER_ITERATION: int = 8
+    BEFORE_ITERATION: int = enum.auto()
+    AFTER_ITERATION: int = enum.auto()
 
-    BEFORE_BACKWARD: int = 9
-    AFTER_BACKWARD: int = 10
+    BEFORE_BACKWARD: int = enum.auto()
+    AFTER_BACKWARD: int = enum.auto()
 
 
 class Trigger(object):
@@ -39,8 +38,18 @@ class Extension(object):
         raise NotImplementedError
 
 
+class Pipeline(Extension):
+    def __init__(self, *extensions: Extension) -> None:
+        super(Pipeline, self).__init__()
+        self._extensions = extensions
+
+    def __call__(self, schedule: 'Schedule') -> None:
+        for extension in self._extensions:
+            extension.__call__(schedule=schedule)
+
+
 class Schedule(object):
-    def __init__(self, estimator: nn.Module, optimizer: optim.Optimizer, monitor: Monitor) -> None:
+    def __init__(self, estimator: Architecture, optimizer, monitor: Monitor) -> None:
         super(Schedule, self).__init__()
 
         self.monitor = monitor
@@ -63,5 +72,5 @@ class Schedule(object):
             if moment in trigger.moments and trigger(moment, schedule=self):
                 extension(schedule=self)
 
-    def run(self, data_loader: DataLoader, num_epochs: int):
+    def run(self, data_loader, num_epochs: int):
         raise NotImplementedError

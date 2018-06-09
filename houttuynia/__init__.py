@@ -1,11 +1,12 @@
 import random
+from contextlib import contextmanager
 
 from torch import Tensor
-import numpy as np
 import torch
 from torch import nn
+import numpy as np
 
-from . import logging
+from . import log_system
 
 
 class Configuration(dict):
@@ -20,7 +21,7 @@ class Configuration(dict):
 
 
 config = Configuration(
-    handler=logging.push_stream_handler(),
+    handler=log_system.push_stream_handler(),
     device=torch.device('cpu'),
     chapter='train',
 )
@@ -39,60 +40,63 @@ def to_device(device_id: str, *moduels: nn.Module) -> None:
         module.to(config['device'])
 
 
+@contextmanager
 def using_config(**kwargs):
     global config
-    old_config = {**config}
-    config = {**old_config, **kwargs}
+    old_kwargs = {}
+    for key, value in kwargs.items():
+        old_kwargs[key], config[key] = config[key], value
     try:
         yield
     finally:
-        config = old_config
+        for key, value in old_kwargs.items():
+            config[key] = value
 
 
 # tensor type definitions
 
 def i8_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.i8)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.int8)
 
 
 def i16_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.i16)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.int16)
 
 
 def i32_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.i32)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.int32)
 
 
 def i64_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.i64)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.int64)
 
 
 def u8_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.u8)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.uint8)
 
 
 def u16_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.u16)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.uint16)
 
 
 def u32_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.u32)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.uint32)
 
 
 def u64_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.u64)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.uint64)
 
 
 def f16_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.f16)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.float16)
 
 
 def f32_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.f32)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.float32)
 
 
 def f64_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.f64)
+    return torch.tensor(tensor, device=config['device'], dtype=torch.float64)
 
 
 byte_tensor = u8_tensor

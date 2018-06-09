@@ -1,13 +1,17 @@
+from pathlib import Path
 from typing import Union
 
 import torch
 from torch import Tensor
 from torch.nn import init
 from torch import nn
+from houttuynia import log_system
+from houttuynia import f32_tensor
+from houttuynia.vocabulary import Vocab
 
 __all__ = [
     'keras_conv_', 'keras_lstm_',
-    'positional_',
+    'positional_', 'glove_',
 ]
 
 
@@ -43,3 +47,19 @@ def positional_(tensor: Tensor) -> None:
         tensor = pos.view(-1, 1) @ ixs.view(1, -1)
         tensor[..., 0::2].sin_()
         tensor[..., 1::2].cos_()
+
+
+def token_vectors_stream(file: Path, vocab: Vocab, encoding: str = 'utf-8'):
+    with file.open(mode='r', encoding=encoding) as reader:
+        for token_vectors in reader:
+            token, vectors = token_vectors.strip().split(' ')
+            if token in vocab:
+                yield token, [float(v) for v in vectors]
+
+
+def glove_(tensor: Tensor, file: Path, vocab: Vocab, encoding: str = 'utf-8') -> None:
+    with torch.no_grad():
+        for count, (token, vectors) in enumerate(
+                token_vectors_stream(file, vocab, encoding), start=1):
+            tensor[vocab(token)] = f32_tensor(vectors)
+    return log_system.notice(f'loaded {count} tokens from {file}')
