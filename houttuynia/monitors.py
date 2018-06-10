@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple, Type
 from functools import wraps
 
 import numpy as np
@@ -11,7 +11,18 @@ from houttuynia import config
 __all__ = [
     'Monitor',
     'FilesystemMonitor', 'TensorboardMonitor',
+    'get_monitor',
 ]
+
+
+def unwrap_chapter(func):
+    @wraps(func)
+    def wrapper(*args, chapter: str = None, **kwargs):
+        if chapter is None:
+            chapter = config['chapter']
+        return func(*args, chapter=chapter, **kwargs)
+
+    return wrapper
 
 
 class Monitor(object):
@@ -108,10 +119,10 @@ class Monitor(object):
 
 class FilesystemMonitor(Monitor):
 
-    def __init__(self, log_file: Path, encoding: str = 'utf-8') -> None:
+    def __init__(self, log_dir: Path, name: str = 'log.txt', encoding: str = 'utf-8') -> None:
         super(FilesystemMonitor, self).__init__()
-        self.log_file = log_file
-        self.stream = log_file.open(mode='w', encoding=encoding)
+        self.log_file = log_dir / name
+        self.stream = self.log_file.open(mode='w', encoding=encoding)
 
     def __del__(self):
         self.stream.close()
@@ -139,3 +150,10 @@ class TensorboardMonitor(Monitor):
         for name, value in values.items():
             self.summary_writer.add_scalars(
                 main_tag=name, tag_scalar_dict={chapter: value}, global_step=iteration)
+
+
+def get_monitor(name: str) -> Type[Monitor]:
+    return {
+        'filesystem': FilesystemMonitor,
+        'tensorboard': TensorboardMonitor,
+    }.get(name.strip().lower(), FilesystemMonitor)

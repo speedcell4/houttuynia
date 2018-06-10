@@ -6,7 +6,6 @@ setup(
     packages=[
         'houttuynia',
         'houttuynia.datasets',
-        'houttuynia.examples',
         'houttuynia.extensions',
         'houttuynia.nn',
     ],
@@ -18,6 +17,7 @@ setup(
         'matplotlib',
         'logbook',
         'tensorboardX',
+        'git+https://github.com/speedcell4/aku.git'
     ],
     url='',
     license='MIT',

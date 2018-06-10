@@ -16,13 +16,16 @@ class EpochalSchedule(Schedule):
     def __init__(self, estimator: Architecture, optimizer: optim.Optimizer, monitor: Monitor) -> None:
         super().__init__(estimator=estimator, optimizer=optimizer, monitor=monitor)
 
+        self.epoch = 0
+
         self.register_extension(Periodic(Moment.BEFORE_EPOCH, epoch=1))(StartWatch('epoch'))
         self.register_extension(Periodic(Moment.AFTER_EPOCH, epoch=1))(StopWatch('epoch'))
 
     def run(self, data_loader: DataLoader, num_epochs: int):
         self.trigger_extension(Moment.BEFORE_RUN)
 
-        for self.epoch in range(num_epochs):
+        for _ in range(num_epochs):
+            self.epoch += 1
             self.trigger_extension(Moment.BEFORE_EPOCH)
 
             for batch in data_loader:
