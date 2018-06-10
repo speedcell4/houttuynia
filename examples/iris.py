@@ -39,9 +39,9 @@ app = aku.App(__file__)
 @app.register
 def train(hidden_features: int = 100, dropout: float = 0.05,
           bias: bool = True, negative_slope: float = 0.05,
-          seed: int = 2333, device: str = 'cpu', batch_size: int = 5, num_epochs: int = 50,
+          seed: int = 42, device: str = 'cpu', batch_size: int = 5, num_epochs: int = 50,
           out_dir: Path = Path('log_dir'),
-          monitor: ('filesystem', 'tensorboard') = 'filesystem'):
+          monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
     """ train iris classifier
 
     Args:

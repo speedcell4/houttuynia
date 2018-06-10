@@ -1,6 +1,4 @@
 import random
-from contextlib import contextmanager
-from functools import wraps
 
 from torch import Tensor
 import torch
@@ -35,34 +33,10 @@ def manual_seed(seed: int) -> None:
     torch.cuda.manual_seed_all(seed)
 
 
-def unwrap_chapter(func):
-    @wraps(func)
-    def wrapper(*args, chapter=None, **kwargs):
-        if chapter is None:
-            chapter = config['chapter']
-
-        return func(*args, chapter=chapter, **kwargs)
-
-    return wrapper
-
-
 def to_device(device_id: str, *moduels: nn.Module) -> None:
     config['device'] = torch.device(device_id)
     for module in moduels:
         module.to(config['device'])
-
-
-@contextmanager
-def using_config(**kwargs):
-    global config
-    old_kwargs = {}
-    for key, value in kwargs.items():
-        old_kwargs[key], config[key] = config[key], value
-    try:
-        yield
-    finally:
-        for key, value in old_kwargs.items():
-            config[key] = value
 
 
 # tensor type definitions
