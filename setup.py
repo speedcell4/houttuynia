@@ -17,7 +17,6 @@ setup(
         'matplotlib',
         'logbook',
         'tensorboardX',
-        'git+https://github.com/speedcell4/aku.git'
     ],
     url='',
     license='MIT',
