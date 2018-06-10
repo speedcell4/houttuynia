@@ -6,17 +6,17 @@ from torch import nn, optim
 from houttuynia.monitors import get_monitor
 from houttuynia.schedules import EpochalSchedule
 from houttuynia.nn import Classifier
-from houttuynia import log_system, to_device
+from houttuynia import log_system, to_device, manual_seed
 from houttuynia.datasets import prepare_iris_dataset
 from houttuynia.schedule import Moment, Pipeline
-from houttuynia.extensions import CommitScalarByMean, Evaluation
+from houttuynia.extensions import CommitScalarByMean, Evaluation, ClipGradNorm
 from houttuynia.triggers import Periodic
 from houttuynia.utils import experiment_hash, ensure_output_dir
 
 
 class IrisEstimator(Classifier):
     def __init__(self, in_features: int, num_classes: int, hidden_features: int, dropout: float,
-                 bias: bool = True, negative_slope: float = 0.2) -> None:
+                 bias: bool, negative_slope: float) -> None:
         self.dropout = dropout
         self.in_features = in_features
         self.num_classes = num_classes
@@ -37,10 +37,11 @@ app = aku.App(__file__)
 
 
 @app.register
-def train(hidden_features: int = 100, dropout: float = 0.2, bias: bool = True, negative_slope: float = 0.2,
-          device: str = 'cpu',
-          batch_size: int = 1, num_epochs: int = 50, out_dir: Path = Path('log_dir'),
-          monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
+def train(hidden_features: int = 100, dropout: float = 0.05,
+          bias: bool = True, negative_slope: float = 0.05,
+          seed: int = 2333, device: str = 'cpu', batch_size: int = 5, num_epochs: int = 50,
+          out_dir: Path = Path('log_dir'),
+          monitor: ('filesystem', 'tensorboard') = 'filesystem'):
     """ train iris classifier
 
     Args:
@@ -48,6 +49,7 @@ def train(hidden_features: int = 100, dropout: float = 0.2, bias: bool = True, n
         dropout: the dropout ratio
         bias:  whether or not use the bias in hidden layers
         negative_slope: the ratio of negative part
+        seed: the random seed number
         device: device id
         batch_size: the size of each batch
         num_epochs: the total numbers of epochs
@@ -57,6 +59,9 @@ def train(hidden_features: int = 100, dropout: float = 0.2, bias: bool = True, n
     out_dir /= experiment_hash(**locals())
     ensure_output_dir(out_dir)
     log_system.notice(f'experiment output dir => {out_dir}')
+
+    manual_seed(seed)
+    log_system.notice(f'random seed => {seed}')
 
     train, test = prepare_iris_dataset(batch_size)
 
@@ -73,6 +78,7 @@ def train(hidden_features: int = 100, dropout: float = 0.2, bias: bool = True, n
     schedule.register_extension(Periodic(Moment.AFTER_ITERATION, iteration=5))(CommitScalarByMean(
         'criterion', 'acc', chapter='train',
     ))
+    schedule.register_extension(Periodic(Moment.AFTER_BACKWARD, iteration=1))(ClipGradNorm(max_norm=4.))
     schedule.register_extension(Periodic(Moment.AFTER_EPOCH, epoch=1))(Pipeline(
         Evaluation(data_loader=test, chapter='test'),
         CommitScalarByMean('criterion', 'acc', chapter='test'),

@@ -8,8 +8,6 @@ __all__ = [
 class Periodic(Trigger):
     def __init__(self, moments: Moment, **intervals) -> None:
         super().__init__(moments)
-        assert intervals.__len__() > 0, 'you should set at least one interval value'
-
         self.intervals = intervals
 
     def __call__(self, moment: Moment, schedule: 'Schedule') -> bool:
