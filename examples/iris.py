@@ -11,7 +11,7 @@ from houttuynia.datasets import prepare_iris_dataset
 from houttuynia.schedule import Moment, Pipeline
 from houttuynia.extensions import CommitScalarByMean, Evaluation, ClipGradNorm
 from houttuynia.triggers import Periodic
-from houttuynia.utils import experiment_hash, ensure_output_dir
+from houttuynia.utils import experiment_hash, ensure_output_dir, options_dump
 
 
 class IrisEstimator(Classifier):
@@ -56,12 +56,14 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
         out_dir: the root path of output
         monitor: the type of monitor
     """
-    out_dir /= experiment_hash(**locals())
-    ensure_output_dir(out_dir)
-    log_system.notice(f'experiment output dir => {out_dir}')
+    options = locals()
+    experiment_dir = out_dir / experiment_hash(**options)
+    ensure_output_dir(experiment_dir)
+    options_dump(experiment_dir, **options)
+    log_system.notice(f'experiment_dir => {experiment_dir}')
 
     manual_seed(seed)
-    log_system.notice(f'random seed => {seed}')
+    log_system.notice(f'seed => {seed}')
 
     train, test = prepare_iris_dataset(batch_size)
 
@@ -70,7 +72,7 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
         negative_slope=negative_slope, bias=bias
     )
     optimizer = optim.Adam(estimator.parameters())
-    monitor = get_monitor(monitor)(log_dir=out_dir)
+    monitor = get_monitor(monitor)(log_dir=experiment_dir)
 
     to_device(device, estimator)
 
