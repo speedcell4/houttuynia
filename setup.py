@@ -8,6 +8,7 @@ setup(
         'houttuynia.datasets',
         'houttuynia.extensions',
         'houttuynia.nn',
+        'houttuynia.nn.modules',
     ],
     install_requires=[
         'torch>=0.4.0',
