@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 import torch
 
 from ..schedule import Extension, Schedule
-from context_managers import using_config
+from houttuynia.context_managers import using_config
 
 __all__ = [
     'Evaluation',
