@@ -17,25 +17,25 @@ __all__ = [
 
 class MultiHead(nn.Module):
     def __init__(self, num_heads: int, out_features: int,
-                 key_features: int = None, value_feature: int = None) -> None:
+                 key_features: int = None, value_features: int = None) -> None:
         super(MultiHead, self).__init__()
         assert out_features % num_heads == 0
 
         if key_features is None:
             key_features = out_features
-        if value_feature is None:
-            value_feature = out_features
+        if value_features is None:
+            value_features = out_features
 
         self.key_features = key_features
-        self.value_feature = value_feature
+        self.value_features = value_features
         self.out_features = out_features
-        self.model_feature = out_features // num_heads
+        self.model_features = out_features // num_heads
         self.num_heads = num_heads
 
         self.W = nn.Parameter(torch.Tensor(out_features, out_features).float())
         self.Q = nn.Parameter(torch.Tensor(key_features, out_features).float())
         self.K = nn.Parameter(torch.Tensor(key_features, out_features).float())
-        self.V = nn.Parameter(torch.Tensor(value_feature, out_features).float())
+        self.V = nn.Parameter(torch.Tensor(value_features, out_features).float())
 
         self.reset_parameters()
 
@@ -50,7 +50,7 @@ class MultiHead(nn.Module):
         K = (K @ self.K).view([*K.size()[:-1], self.num_heads, self.model_feature])
         V = (V @ self.V).view([*V.size()[:-1], self.num_heads, self.model_feature])
         A = torch.einsum('bqhf,bkhf->bqhk', (Q, K))
-        A = F.softmax(A / (self.model_feature ** 0.5), dim=-1)
+        A = F.softmax(A / (self.model_features ** 0.5), dim=-1)
         A = torch.einsum('bqhk,bkhf->bqhf', (A, V))
         return A.contiguous().view([*A.size()[:-2], -1]) @ self.W
 
