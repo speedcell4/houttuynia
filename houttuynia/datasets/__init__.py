@@ -1,1 +1,1 @@
-from .iris import prepare_iris_dataset
+from houttuynia.datasets.iris import prepare_iris_dataset

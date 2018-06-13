@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 import torch
 
-from ..schedule import Extension, Schedule
+from houttuynia.schedule import Extension, Schedule
 from houttuynia.context_managers import using_config
 
 __all__ = [

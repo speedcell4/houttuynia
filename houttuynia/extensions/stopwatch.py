@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from houttuynia import log_system
-from ..schedule import Extension, Schedule
+from houttuynia.schedule import Extension, Schedule
 
 __all__ = [
     'StartWatch', 'StopWatch',

@@ -1,1 +1,1 @@
-from .modules import *
+from houttuynia.nn.modules import *

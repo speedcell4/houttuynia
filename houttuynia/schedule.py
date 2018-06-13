@@ -1,8 +1,8 @@
 import enum
 from typing import List, Tuple
 
-from .monitors import Monitor
-from .nn import Architecture
+from houttuynia.monitors import Monitor
+from houttuynia.nn import Architecture
 
 __all__ = ['Moment', 'Trigger', 'Extension', 'Pipeline', 'Schedule']
 

@@ -1,11 +1,11 @@
 from torch import optim
 from torch.utils.data import DataLoader
 
-from .nn import Architecture
-from .monitors import Monitor
-from .schedule import Moment, Schedule
-from .extensions import StartWatch, StopWatch, WarningUnused
-from .triggers import Periodic
+from houttuynia.nn import Architecture
+from houttuynia.monitors import Monitor
+from houttuynia.schedule import Moment, Schedule
+from houttuynia.extensions import StartWatch, StopWatch, WarningUnused
+from houttuynia.triggers import Periodic
 
 __all__ = [
     'EpochalSchedule',

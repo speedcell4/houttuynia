@@ -4,7 +4,7 @@ from torch import nn
 from torch import Tensor
 
 from houttuynia import log_system
-from .metrics import AccuracyMetricWithLogits
+from houttuynia.nn.modules.metrics import AccuracyMetricWithLogits
 
 __all__ = [
     'Architecture', 'Classifier',

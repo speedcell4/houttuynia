@@ -1,4 +1,4 @@
-from .schedule import *
+from houttuynia.schedule import *
 
 __all__ = [
     'Periodic',

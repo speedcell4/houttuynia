@@ -1,6 +1,6 @@
 import warnings
 
-from ..schedule import Extension, Schedule
+from houttuynia.schedule import Extension, Schedule
 
 __all__ = [
     'WarningUnused',

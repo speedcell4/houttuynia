@@ -1,6 +1,6 @@
 from torch import nn
 
-from .functional import accuracy_metric, accuracy_metric_with_logits
+from houttuynia.nn.modules.functional import accuracy_metric, accuracy_metric_with_logits
 
 __all__ = [
     'AccuracyMetric', 'AccuracyMetricWithLogits',
