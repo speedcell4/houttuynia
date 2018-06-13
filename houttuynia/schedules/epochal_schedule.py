@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from extensions import StartWatch, StopWatch, WarningUnused
 from monitors import Monitor
 from nn import Architecture
-from schedule import Schedule, Moment
+from schedule import Moment, Schedule
 from triggers import Periodic
 
 __all__ = [
@@ -36,8 +36,8 @@ class EpochalSchedule(Schedule):
 
                 self.estimator.train()
                 self.optimizer.zero_grad()
-                self.criterion, metrics = self.estimator.fit(*batch)
-                self.monitor.report_scalars(**metrics)
+                self.criterion, self.metrics = self.estimator.fit(*batch)
+                self.monitor.report_scalars(**self.metrics)
 
                 self.trigger_extension(Moment.BEFORE_BACKWARD)
                 self.criterion.backward()
@@ -46,6 +46,7 @@ class EpochalSchedule(Schedule):
 
                 self.trigger_extension(Moment.AFTER_ITERATION)
                 del self.criterion
+                del self.metrics
 
             self.trigger_extension(Moment.AFTER_EPOCH)
 
