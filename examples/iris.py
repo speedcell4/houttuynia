@@ -6,12 +6,12 @@ from torch import nn, optim
 from houttuynia.monitors import get_monitor
 from houttuynia.schedules import EpochalSchedule
 from houttuynia.nn import Classifier
-from houttuynia import log_system, to_device, manual_seed
+from houttuynia import log_system, manual_seed, to_device
 from houttuynia.datasets import prepare_iris_dataset
 from houttuynia.schedule import Moment, Pipeline
-from houttuynia.extensions import CommitScalarByMean, Evaluation, ClipGradNorm
+from houttuynia.extensions import ClipGradNorm, CommitScalarByMean, Evaluation
 from houttuynia.triggers import Periodic
-from houttuynia.utils import experiment_hash, ensure_output_dir, options_dump
+from houttuynia.utils import ensure_output_dir, experiment_hash, options_dump
 
 
 class IrisEstimator(Classifier):
