@@ -27,7 +27,7 @@ class PositionalEmbedding(nn.Module):
         position = self.position_embedding.weight[:sentence, :features]
         if self.freeze_position:
             position = position.detach()
-        return inputs + position
+        return position
 
 
 if __name__ == '__main__':
