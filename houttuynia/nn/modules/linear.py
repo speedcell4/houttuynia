@@ -22,8 +22,8 @@ class Highway(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        nonlinearity = self.sigmoid.__class__.__name__.lower()
-        gain = init.calculate_gain(nonlinearity)
+        name = self.sigmoid.__class__.__name__.lower()
+        gain = init.calculate_gain(name)
 
         init.xavier_uniform_(self.transform.weight, 1.0)
         init.xavier_uniform_(self.carry.weight, gain)
@@ -32,7 +32,6 @@ class Highway(nn.Module):
             init.constant_(self.carry.bias, 1.)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        t = self.transform(x)
-        c = self.sigmoid(self.carry(x))
-
-        return c * t + (1 - c) * x
+        transform = self.transform(x)
+        carry = self.sigmoid(self.carry(x))
+        return carry * transform + (1 - carry) * x
