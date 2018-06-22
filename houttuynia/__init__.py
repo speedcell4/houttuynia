@@ -5,7 +5,7 @@ import torch
 from torch import nn
 import numpy as np
 
-from . import log_system
+from houttuynia import log_system
 
 
 class Configuration(dict):

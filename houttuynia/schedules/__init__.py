@@ -1,1 +1,1 @@
-from .epochal_schedule import EpochalSchedule
+from houttuynia.schedules.epochal_schedule import EpochalSchedule
