@@ -5,6 +5,7 @@ import torch
 from torch import Tensor
 from torch.nn import init
 from torch import nn
+
 from houttuynia import log_system
 from houttuynia import f32_tensor
 from houttuynia.vocabulary import Vocab

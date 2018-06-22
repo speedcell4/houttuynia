@@ -52,10 +52,3 @@ class GramConv1(nn.Sequential):
         inputs = inputs.transpose(-2, dim)
         outputs = super(GramConv1, self).forward(inputs)
         return outputs.transpose(-2, dim)
-
-
-if __name__ == '__main__':
-    conv = GramConv1(20, 3)
-    x = torch.rand(7, 5, 20)
-    y = conv(x)
-    print(x.shape, y.shape)

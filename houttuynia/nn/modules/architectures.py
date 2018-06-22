@@ -1,4 +1,5 @@
 from typing import Dict, Tuple
+import warnings
 
 from torch import nn
 from torch import Tensor
@@ -12,6 +13,10 @@ __all__ = [
 
 
 class Architecture(nn.Module):
+    def __init__(self, *args, **kwargs):
+        super(Architecture, self).__init__()
+        warnings.warn(f'{self.__class__.__name__} will be removed in the next version', category=DeprecationWarning)
+
     def forward(self, *input) -> Tensor:
         raise NotImplementedError
 

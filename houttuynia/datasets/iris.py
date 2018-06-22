@@ -1,6 +1,8 @@
-import torch
+from typing import Tuple
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, TensorDataset
-from sklearn import datasets
 
 from houttuynia import float_tensor, long_tensor
 
@@ -9,16 +11,20 @@ __all__ = [
 ]
 
 
-def prepare_iris_dataset(batch_size: int, shuffle: int = True, ratio: float = 0.8):
-    data, target = datasets.load_iris(return_X_y=True)
-    indexes = torch.torch.randperm(target.shape[0])
-    pivot = int(indexes.shape[0] * ratio)
-    train_idx, test_idx = indexes[:pivot], indexes[pivot:]
+def prepare_iris_dataset(batch_size: int, shuffle: int = True,
+                         train_size: float = 0.8) -> Tuple[DataLoader, DataLoader]:
+    data, targets = load_iris(return_X_y=True)
+    data_train, data_test, targets_train, targets_test = \
+        train_test_split(data, targets, train_size=train_size, shuffle=True)
 
-    data = float_tensor(data)
-    target = long_tensor(target)
+    train_dataset = TensorDataset(float_tensor(data_train), long_tensor(targets_train))
+    test_dataset = TensorDataset(float_tensor(data_test), long_tensor(targets_test))
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=shuffle)
+    return train_loader, test_loader
 
-    train_dataset = TensorDataset(data[train_idx], target[train_idx])
-    test_dataset = TensorDataset(data[test_idx], target[test_idx])
-    return DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle), \
-           DataLoader(test_dataset, batch_size=len(test_dataset), shuffle=False)
+
+if __name__ == '__main__':
+    train_data, test_data = prepare_iris_dataset(4)
+    for instance in train_data:
+        print(instance)

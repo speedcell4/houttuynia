@@ -13,6 +13,13 @@ __all__ = [
 ]
 
 
+def dot_product_attention(Q: Tensor, K: Tensor, V: Tensor, mask: Tensor = None) -> Tensor:
+    A = Q @ K.transpose(-2, -1) / (Q.shape[-1] ** 0.5)
+    if mask is not None:
+        A.fill_mask(mask, -float('inf'))
+    return F.softmax(A, -1) @ V
+
+
 class MultiHead(nn.Module):
     def __init__(self, num_heads: int, out_features: int,
                  key_features: int = None, value_features: int = None) -> None:
