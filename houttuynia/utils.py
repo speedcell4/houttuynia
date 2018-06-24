@@ -70,14 +70,14 @@ def serialization(path: Path):
         @functools.wraps(func)
         def arg_wrap(*args, **kwargs):
             try:
-                logging.notice(f'loading data from {path}')
                 with path.open(mode='rb') as fp:
+                    logging.notice(f'loading data from {path}')
                     ret = pickle.load(fp)
                 return ret
             except (FileNotFoundError, AttributeError):
                 ret = func(*args, **kwargs)
-                logging.notice(f'dumping data to {path}')
                 with path.open(mode='wb') as fp:
+                    logging.notice(f'dumping data to {path}')
                     pickle.dump(ret, fp)
                 return ret
 
