@@ -6,6 +6,10 @@ from typing import Any
 import json
 import socket
 import os
+import pickle
+import functools
+
+from houttuynia import log_system as logging
 
 __all__ = [
     'ensure_output_dir',
@@ -13,6 +17,8 @@ __all__ = [
 
     'git_hash', 'datetime_hash', 'options_hash',
     'experiment_hash',
+
+    'serialization',
 ]
 
 
@@ -56,6 +62,28 @@ def options_dump(path: Path, __json_name: str = 'options.json', __encoding: str 
 
 def experiment_hash(hash_length: int = 8, **options: Any) -> str:
     return f'{datetime_hash()}-{git_hash()[:hash_length]}-{options_hash(**options)[:hash_length]}'
+
+
+# TODO receive function to generate a Path
+def serialization(path: Path):
+    def fn_wrap(func):
+        @functools.wraps(func)
+        def arg_wrap(*args, **kwargs):
+            try:
+                logging.notice(f'loading data from {path}')
+                with path.open(mode='rb') as fp:
+                    ret = pickle.load(fp)
+                return ret
+            except (FileNotFoundError, AttributeError):
+                ret = func(*args, **kwargs)
+                logging.notice(f'dumping data to {path}')
+                with path.open(mode='wb') as fp:
+                    pickle.dump(ret, fp)
+                return ret
+
+        return arg_wrap
+
+    return fn_wrap
 
 
 if __name__ == '__main__':
