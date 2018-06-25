@@ -6,6 +6,7 @@ from torch import nn
 import numpy as np
 
 from houttuynia import log_system
+from houttuynia.vocabulary import *
 
 
 class Configuration(dict):
@@ -21,7 +22,6 @@ class Configuration(dict):
 
 config = Configuration(
     handler=log_system.push_stream_handler(),
-    device=torch.device('cpu'),
     chapter='train',
 )
 
@@ -33,10 +33,17 @@ def manual_seed(seed: int) -> None:
     torch.cuda.manual_seed_all(seed)
 
 
-def to_device(device_id: str, *moduels: nn.Module) -> None:
-    config['device'] = torch.device(device_id)
-    for module in moduels:
+def to_device(device_num: int, *modules: nn.Module) -> None:
+    if device_num >= 0:
+        config['device'] = torch.device(f'cuda:{device_num}')
+        torch.cuda.set_device(config['device'])
+    else:
+        config['device'] = torch.device(f'cpu')
+    for module in modules:
         module.to(config['device'])
+
+
+to_device(-1)
 
 
 # tensor type definitions
