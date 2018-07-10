@@ -106,7 +106,7 @@ class Schedule(object):
         raise NotImplementedError
 
 
-from extensions import StartWatch, StopWatch, WarningUnused
+from .extensions import StartWatch, StopWatch, WarningUnused
 
 
 class EpochalSchedule(Schedule):
