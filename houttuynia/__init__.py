@@ -33,9 +33,9 @@ def manual_seed(seed: int) -> None:
     torch.cuda.manual_seed_all(seed)
 
 
-def to_device(device_num: int, *modules: nn.Module) -> None:
-    if device_num >= 0:
-        config['device'] = torch.device(f'cuda:{device_num}')
+def to_device(device: int, *modules: nn.Module) -> None:
+    if device >= 0:
+        config['device'] = torch.device(f'cuda:{device}')
         torch.cuda.set_device(config['device'])
     else:
         config['device'] = torch.device(f'cpu')

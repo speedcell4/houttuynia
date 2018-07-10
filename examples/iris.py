@@ -9,7 +9,7 @@ from houttuynia.nn import Classifier
 from houttuynia import log_system, manual_seed, to_device
 from houttuynia.datasets import prepare_iris_dataset
 from houttuynia.schedule import Moment, Pipeline
-from houttuynia.extensions import ClipGradNorm, CommitScalarByMean, Evaluation
+from houttuynia.extensions import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
 from houttuynia.triggers import Periodic
 from houttuynia.utils import ensure_output_dir, experiment_hash, options_dump
 
@@ -39,7 +39,7 @@ app = aku.App(__file__)
 @app.register
 def train(hidden_features: int = 100, dropout: float = 0.05,
           bias: bool = True, negative_slope: float = 0.05,
-          seed: int = 42, device: str = 'cpu', batch_size: int = 5, num_epochs: int = 50,
+          seed: int = 42, device: int = -1, batch_size: int = 5, num_epochs: int = 50,
           out_dir: Path = Path('../out_dir'), monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
     """ train iris classifier
 
@@ -56,10 +56,10 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
         monitor: the type of monitor
     """
     options = locals()
-    experiment_dir = out_dir / experiment_hash(**options)
-    ensure_output_dir(experiment_dir)
-    options_dump(experiment_dir, **options)
-    log_system.notice(f'experiment_dir => {experiment_dir}')
+    expt_dir = out_dir / experiment_hash(**options)
+    ensure_output_dir(expt_dir)
+    options_dump(expt_dir, **options)
+    log_system.notice(f'expt_dir => {expt_dir}')
 
     manual_seed(seed)
     log_system.notice(f'seed => {seed}')
@@ -71,11 +71,13 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
         negative_slope=negative_slope, bias=bias
     )
     optimizer = optim.Adam(estimator.parameters())
-    monitor = get_monitor(monitor)(log_dir=experiment_dir)
+    monitor = get_monitor(monitor)(log_dir=expt_dir)
 
     to_device(device, estimator)
 
     schedule = EpochalSchedule(estimator, optimizer, monitor)
+    schedule.register_extension(Periodic(Moment.AFTER_EPOCH, epoch=1))(
+        Snapshot(out_dir=expt_dir, iris_estimator=estimator))
     schedule.register_extension(Periodic(Moment.AFTER_ITERATION, iteration=5))(CommitScalarByMean(
         'criterion', 'acc', chapter='train',
     ))
