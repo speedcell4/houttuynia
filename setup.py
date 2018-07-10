@@ -6,12 +6,11 @@ setup(
     long_description=open('README.md', 'r').read(),
     packages=[
         'houttuynia',
-        'houttuynia.datasets',
+        'houttuynia.data_loader',
         'houttuynia.extensions',
         'houttuynia.nn',
         'houttuynia.nn.modules',
         'houttuynia.nn.utils',
-        'houttuynia.schedules',
     ],
     install_requires=[
         'torch>=0.4.0',

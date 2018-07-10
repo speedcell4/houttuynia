@@ -9,7 +9,7 @@ import os
 import pickle
 import functools
 
-from houttuynia import log_system as logging
+from houttuynia import log_system as logging, manual_seed
 
 __all__ = [
     'ensure_output_dir',
@@ -19,6 +19,8 @@ __all__ = [
     'experiment_hash',
 
     'serialization',
+
+    'launch_expt',
 ]
 
 
@@ -84,6 +86,19 @@ def serialization(path: Path):
         return arg_wrap
 
     return fn_wrap
+
+
+def launch_expt(out_dir: Path, **options) -> Path:
+    expt_dir = out_dir / experiment_hash(**options)
+    expt_dir.mkdir(parents=True, exist_ok=False)
+
+    options_dump(expt_dir, **options)
+    logging.notice(f'expt_dir => {expt_dir}')
+
+    manual_seed(options['seed'])
+    logging.notice(f'seed => {options["seed"]}')
+
+    return expt_dir
 
 
 if __name__ == '__main__':
