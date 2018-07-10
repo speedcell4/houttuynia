@@ -1,4 +1,5 @@
-from click import Path
+from pathlib import Path
+
 import torch
 from torch import nn
 
