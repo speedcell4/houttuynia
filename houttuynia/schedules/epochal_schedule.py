@@ -5,7 +5,6 @@ from houttuynia.extensions import StartWatch, StopWatch, WarningUnused
 from houttuynia.monitors import Monitor
 from houttuynia.nn import Architecture
 from houttuynia.schedule import Moment, Schedule
-from houttuynia.triggers import Periodic
 
 __all__ = [
     'EpochalSchedule',
@@ -18,10 +17,10 @@ class EpochalSchedule(Schedule):
 
         self.epoch = 0
 
-        self.register_extension(Periodic(Moment.BEFORE_EPOCH, epoch=1))(StartWatch('epoch'))
-        self.register_extension(Periodic(Moment.AFTER_EPOCH, epoch=1))(StopWatch('epoch'))
+        self.before_epoch(epoch=1)(StartWatch('epoch'))
+        self.after_epoch(epoch=1)(StopWatch('epoch'))
 
-        self.register_extension(Periodic(Moment.AFTER_RUN))(WarningUnused())
+        self.after_run()(WarningUnused())
 
     def run(self, data_loader: DataLoader, num_epochs: int):
         self.trigger_extension(Moment.BEFORE_RUN)
@@ -36,7 +35,7 @@ class EpochalSchedule(Schedule):
 
                 self.estimator.train()
                 self.optimizer.zero_grad()
-                self.criterion, self.metrics = self.estimator.fit(*batch)
+                self.criterion, self.metrics = self.estimator.fit(batch)
                 self.monitor.report_scalars(**self.metrics)
 
                 self.trigger_extension(Moment.BEFORE_BACKWARD)

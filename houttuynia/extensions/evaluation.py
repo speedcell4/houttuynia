@@ -20,5 +20,5 @@ class Evaluation(Extension):
             schedule.estimator.eval()
 
             for batch in self.data_loader:
-                metrics = schedule.estimator.evaluate(*batch)
+                metrics = schedule.estimator.evaluate(batch)
                 schedule.monitor.report_scalars(**metrics)

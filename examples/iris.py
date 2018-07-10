@@ -8,9 +8,7 @@ from houttuynia.schedules import EpochalSchedule
 from houttuynia.nn import Classifier
 from houttuynia import log_system, manual_seed, to_device
 from houttuynia.datasets import prepare_iris_dataset
-from houttuynia.schedule import Moment, Pipeline
 from houttuynia.extensions import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
-from houttuynia.triggers import Periodic
 from houttuynia.utils import ensure_output_dir, experiment_hash, options_dump
 
 
@@ -76,16 +74,11 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
     to_device(device, estimator)
 
     schedule = EpochalSchedule(estimator, optimizer, monitor)
-    schedule.register_extension(Periodic(Moment.AFTER_EPOCH, epoch=1))(
-        Snapshot(out_dir=expt_dir, iris_estimator=estimator))
-    schedule.register_extension(Periodic(Moment.AFTER_ITERATION, iteration=5))(CommitScalarByMean(
-        'criterion', 'acc', chapter='train',
-    ))
-    schedule.register_extension(Periodic(Moment.AFTER_BACKWARD, iteration=1))(ClipGradNorm(max_norm=4.))
-    schedule.register_extension(Periodic(Moment.AFTER_EPOCH, epoch=1))(Pipeline(
-        Evaluation(data_loader=test, chapter='test'),
-        CommitScalarByMean('criterion', 'acc', chapter='test'),
-    ))
+    schedule.after_epoch(epoch=1)(Snapshot(out_dir=expt_dir, iris_estimator=estimator))
+    schedule.after_iteration(iteration=5)(CommitScalarByMean('criterion', 'acc', chapter='train'))
+    schedule.after_backward(iteration=1)(ClipGradNorm(max_norm=4.))
+    schedule.after_epoch(epoch=1)(Evaluation(data_loader=test, chapter='test'))
+    schedule.after_epoch(epoch=1)(CommitScalarByMean('criterion', 'acc', chapter='test'))
 
     return schedule.run(train, num_epochs)
 

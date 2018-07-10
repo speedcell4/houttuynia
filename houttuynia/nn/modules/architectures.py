@@ -55,7 +55,7 @@ class Classifier(Architecture):
     def forward(self, inputs):
         return self.estimator(inputs)
 
-    def fit(self, inputs, targets, *args, **kwargs) -> Tuple[Tensor, Dict[str, float]]:
+    def _fit(self, inputs, targets, *args, **kwargs) -> Tuple[Tensor, Dict[str, float]]:
         outputs = self(inputs, *args, **kwargs)
         criterion = self.criterion(outputs, targets)
 
@@ -65,6 +65,9 @@ class Classifier(Architecture):
         }
         metrics.update(criterion=criterion.item())
         return criterion, metrics
+
+    def fit(self, batch):
+        return self._fit(*batch)
 
 
 class EncoderDecoder(Architecture):

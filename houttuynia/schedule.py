@@ -4,7 +4,7 @@ from typing import List, Tuple
 from houttuynia.monitors import Monitor
 from houttuynia.nn import Architecture
 
-__all__ = ['Moment', 'Trigger', 'Extension', 'Pipeline', 'Schedule']
+__all__ = ['Moment', 'Trigger', 'Extension', 'Schedule']
 
 
 @enum.unique
@@ -33,19 +33,22 @@ class Trigger(object):
         raise NotImplementedError
 
 
+class Periodic(Trigger):
+    def __init__(self, moments: Moment, **intervals) -> None:
+        super().__init__(moments)
+        self.intervals = intervals
+
+    def __call__(self, moment: Moment, schedule: 'Schedule') -> bool:
+        for key, interval in self.intervals.items():
+            # TODO warning for not hasattr
+            if getattr(schedule, key) % interval != 0:
+                return False
+        return True
+
+
 class Extension(object):
     def __call__(self, schedule: 'Schedule') -> None:
         raise NotImplementedError
-
-
-class Pipeline(Extension):
-    def __init__(self, *extensions: Extension) -> None:
-        super(Pipeline, self).__init__()
-        self._extensions = extensions
-
-    def __call__(self, schedule: 'Schedule') -> None:
-        for extension in self._extensions:
-            extension.__call__(schedule=schedule)
 
 
 class Schedule(object):
@@ -66,6 +69,30 @@ class Schedule(object):
             return extension
 
         return wrapper
+
+    def before_run(self):
+        return self.register_extension(Periodic(Moment.BEFORE_RUN))
+
+    def after_run(self):
+        return self.register_extension(Periodic(Moment.AFTER_RUN))
+
+    def before_epoch(self, *, epoch, **intervals):
+        return self.register_extension(Periodic(Moment.BEFORE_EPOCH, epoch=epoch, **intervals))
+
+    def after_epoch(self, *, epoch, **intervals):
+        return self.register_extension(Periodic(Moment.AFTER_EPOCH, epoch=epoch, **intervals))
+
+    def before_iteration(self, *, iteration, **intervals):
+        return self.register_extension(Periodic(Moment.BEFORE_ITERATION, iteration=iteration, **intervals))
+
+    def after_iteration(self, *, iteration, **intervals):
+        return self.register_extension(Periodic(Moment.AFTER_ITERATION, iteration=iteration, **intervals))
+
+    def before_backward(self, *, iteration, **intervals):
+        return self.register_extension(Periodic(Moment.BEFORE_BACKWARD, iteration=iteration, **intervals))
+
+    def after_backward(self, *, iteration, **intervals):
+        return self.register_extension(Periodic(Moment.AFTER_BACKWARD, iteration=iteration, **intervals))
 
     def trigger_extension(self, moment: Moment) -> None:
         for trigger, extension in self.extensions:
