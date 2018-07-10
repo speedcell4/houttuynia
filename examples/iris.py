@@ -7,7 +7,7 @@ from houttuynia.monitors import get_monitor
 from houttuynia.schedules import EpochalSchedule
 from houttuynia.nn import Classifier
 from houttuynia import log_system, manual_seed, to_device
-from houttuynia.datasets import prepare_iris_dataset
+from houttuynia.data_loader import prepare_iris_dataset
 from houttuynia.extensions import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
 from houttuynia.utils import ensure_output_dir, experiment_hash, options_dump
 
