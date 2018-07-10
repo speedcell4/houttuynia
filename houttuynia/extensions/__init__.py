@@ -1,5 +1,6 @@
-from houttuynia.extensions.commit_scalars import CommitScalarByMean, CommitScalarBySum
-from houttuynia.extensions.stopwatch import StartWatch, StopWatch
-from houttuynia.extensions.evaluation import Evaluation
-from houttuynia.extensions.warning_unused import WarningUnused
-from houttuynia.extensions.clip_grad import ClipGradNorm, ClipGradValue
+from .commit_scalars import CommitScalarByMean, CommitScalarBySum
+from .stopwatch import StartWatch, StopWatch
+from .evaluation import Evaluation
+from .warning_unused import WarningUnused
+from .clip_grad import ClipGradNorm, ClipGradValue
+from .snapshot import Snapshot
