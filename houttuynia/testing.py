@@ -3,6 +3,8 @@ from typing import List
 from hypothesis import strategies as st
 from hypothesis.searchstrategy import SearchStrategy
 
+VOCAB_SIZE = st.integers(20, 1000)
+
 BATCH = st.integers(1, 20)
 TIMES = st.integers(1, 50)
 

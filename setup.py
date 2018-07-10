@@ -10,6 +10,7 @@ setup(
         'houttuynia.extensions',
         'houttuynia.nn',
         'houttuynia.nn.modules',
+        'houttuynia.nn.utils',
         'houttuynia.schedules',
     ],
     install_requires=[
