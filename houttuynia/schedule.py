@@ -5,7 +5,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 
 from .monitors import Monitor
-from nn import Architecture
+from .nn import Architecture
 
 __all__ = ['Moment', 'Trigger', 'Extension', 'Schedule', 'EpochalSchedule']
 
