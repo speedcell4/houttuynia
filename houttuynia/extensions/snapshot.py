@@ -12,14 +12,14 @@ __all__ = [
 class Snapshot(Extension):
     format_pattern = '{name}_epoch{epoch:02d}.pkl'
 
-    def __init__(self, out_dir: Path, **estimators: nn.Module) -> None:
+    def __init__(self, expt_dir: Path, **estimators: nn.Module) -> None:
         super(Snapshot, self).__init__()
 
-        if out_dir.name != self.__class__.__name__.lower():
-            out_dir /= self.__class__.__name__.lower()
-        out_dir.mkdir(parents=True, exist_ok=True)
+        if expt_dir.name != self.__class__.__name__.lower():
+            expt_dir /= self.__class__.__name__.lower()
+        expt_dir.mkdir(parents=True, exist_ok=True)
 
-        self.out_dir = out_dir
+        self.out_dir = expt_dir
         self.estimators = estimators
 
     def __call__(self, schedule: 'Schedule') -> None:

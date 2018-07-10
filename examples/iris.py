@@ -4,12 +4,12 @@ import aku
 from torch import nn, optim
 
 from houttuynia.monitors import get_monitor
-from houttuynia.schedules import EpochalSchedule
+from houttuynia.schedule import EpochalSchedule
 from houttuynia.nn import Classifier
-from houttuynia import log_system, manual_seed, to_device
+from houttuynia import to_device
 from houttuynia.data_loader import prepare_iris_dataset
 from houttuynia.extensions import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
-from houttuynia.utils import ensure_output_dir, experiment_hash, options_dump
+from houttuynia.utils import launch_expt
 
 
 class IrisEstimator(Classifier):
@@ -37,7 +37,7 @@ app = aku.App(__file__)
 @app.register
 def train(hidden_features: int = 100, dropout: float = 0.05,
           bias: bool = True, negative_slope: float = 0.05,
-          seed: int = 42, device: int = -1, batch_size: int = 5, num_epochs: int = 50,
+          seed: int = 42, device: int = -1, batch_size: int = 5, num_epochs: int = 50, commit_inv: int = 5,
           out_dir: Path = Path('../out_dir'), monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
     """ train iris classifier
 
@@ -50,37 +50,32 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
         device: device id
         batch_size: the size of each batch
         num_epochs: the total numbers of epochs
+        commit_inv: commit interval
         out_dir: the root path of output
         monitor: the type of monitor
     """
-    options = locals()
-    expt_dir = out_dir / experiment_hash(**options)
-    ensure_output_dir(expt_dir)
-    options_dump(expt_dir, **options)
-    log_system.notice(f'expt_dir => {expt_dir}')
+    expt_dir = launch_expt(**locals())
 
-    manual_seed(seed)
-    log_system.notice(f'seed => {seed}')
+    train_loader, test_loader = prepare_iris_dataset(batch_size=batch_size)
 
-    train, test = prepare_iris_dataset(batch_size)
-
-    estimator = IrisEstimator(
-        in_features=4, dropout=dropout, num_classes=3, hidden_features=hidden_features,
-        negative_slope=negative_slope, bias=bias
-    )
+    estimator = IrisEstimator(4, 3, 100, dropout=dropout, bias=bias, negative_slope=negative_slope)
     optimizer = optim.Adam(estimator.parameters())
     monitor = get_monitor(monitor)(log_dir=expt_dir)
 
     to_device(device, estimator)
 
     schedule = EpochalSchedule(estimator, optimizer, monitor)
-    schedule.after_epoch(epoch=1)(Snapshot(out_dir=expt_dir, iris_estimator=estimator))
-    schedule.after_iteration(iteration=5)(CommitScalarByMean('criterion', 'acc', chapter='train'))
-    schedule.after_backward(iteration=1)(ClipGradNorm(max_norm=4.))
-    schedule.after_epoch(epoch=1)(Evaluation(data_loader=test, chapter='test'))
-    schedule.after_epoch(epoch=1)(CommitScalarByMean('criterion', 'acc', chapter='test'))
+    schedule.before_backward(iteration=1)(ClipGradNorm(max_norm=4.))
 
-    return schedule.run(train, num_epochs)
+    schedule.after_epoch(epoch=1)(Snapshot(expt_dir=expt_dir, iris_estimator=estimator))
+    schedule.after_epoch(epoch=1)(Evaluation(data_loader=test_loader, chapter='test'))
+
+    schedule.after_iteration(iteration=commit_inv)(
+        CommitScalarByMean('criterion', 'acc', chapter='train'))
+    schedule.after_epoch(epoch=1)(
+        CommitScalarByMean('criterion', 'acc', chapter='test'))
+
+    return schedule.run(train_loader, num_epochs)
 
 
 if __name__ == '__main__':

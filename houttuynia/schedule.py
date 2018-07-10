@@ -1,10 +1,13 @@
 import enum
 from typing import List, Tuple
 
-from houttuynia.monitors import Monitor
-from houttuynia.nn import Architecture
+from torch import optim
+from torch.utils.data import DataLoader
 
-__all__ = ['Moment', 'Trigger', 'Extension', 'Schedule']
+from monitors import Monitor
+from nn import Architecture
+
+__all__ = ['Moment', 'Trigger', 'Extension', 'Schedule', 'EpochalSchedule']
 
 
 @enum.unique
@@ -101,3 +104,47 @@ class Schedule(object):
 
     def run(self, data_loader, num_epochs: int):
         raise NotImplementedError
+
+
+from extensions import StartWatch, StopWatch, WarningUnused
+
+
+class EpochalSchedule(Schedule):
+    def __init__(self, estimator: Architecture, optimizer: optim.Optimizer, monitor: Monitor) -> None:
+        super().__init__(estimator=estimator, optimizer=optimizer, monitor=monitor)
+
+        self.epoch = 0
+
+        self.before_epoch(epoch=1)(StartWatch('epoch'))
+        self.after_epoch(epoch=1)(StopWatch('epoch'))
+
+        self.after_run()(WarningUnused())
+
+    def run(self, data_loader: DataLoader, num_epochs: int):
+        self.trigger_extension(Moment.BEFORE_RUN)
+
+        for _ in range(num_epochs):
+            self.epoch += 1
+            self.trigger_extension(Moment.BEFORE_EPOCH)
+
+            for batch in data_loader:
+                self.iteration += 1
+                self.trigger_extension(Moment.BEFORE_ITERATION)
+
+                self.estimator.train()
+                self.optimizer.zero_grad()
+                self.criterion, self.metrics = self.estimator.fit(batch)
+                self.monitor.report_scalars(**self.metrics)
+
+                self.trigger_extension(Moment.BEFORE_BACKWARD)
+                self.criterion.backward()
+                self.trigger_extension(Moment.AFTER_BACKWARD)
+                self.optimizer.step()
+
+                self.trigger_extension(Moment.AFTER_ITERATION)
+                del self.criterion
+                del self.metrics
+
+            self.trigger_extension(Moment.AFTER_EPOCH)
+
+        self.trigger_extension(Moment.AFTER_RUN)

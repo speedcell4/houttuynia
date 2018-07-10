@@ -11,7 +11,6 @@ setup(
         'houttuynia.nn',
         'houttuynia.nn.modules',
         'houttuynia.nn.utils',
-        'houttuynia.schedules',
     ],
     install_requires=[
         'torch>=0.4.0',
