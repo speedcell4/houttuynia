@@ -45,7 +45,10 @@ class Monitor(object):
             **values: the name and value dict of criterion or metric
         """
         for name, value in values.items():
-            self.memory.setdefault((name, chapter), []).append(value)
+            if isinstance(value, (list, tuple)):
+                self.memory.setdefault((name, chapter), []).extend(value)
+            else:
+                self.memory.setdefault((name, chapter), []).append(value)
 
     @unwrap_chapter
     def commit_scalars(self, iteration: int, chapter: str = None, **values: float) -> None:
