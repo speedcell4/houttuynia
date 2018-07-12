@@ -5,6 +5,9 @@ from hypothesis.searchstrategy import SearchStrategy
 
 VOCAB_SIZE = st.integers(20, 1000)
 
+SMALL_BATCH = st.integers(1, 4)
+SMALL_BATCHES = st.lists(SMALL_BATCH, min_size=1, max_size=3)
+
 BATCH = st.integers(1, 20)
 BATCHES = st.lists(BATCH, min_size=1, max_size=5)
 TIMES = st.integers(1, 50)

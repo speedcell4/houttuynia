@@ -49,47 +49,47 @@ to_device(-1)
 # tensor type definitions
 
 def i8_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.int8)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.int8)
 
 
 def i16_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.int16)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.int16)
 
 
 def i32_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.int32)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.int32)
 
 
 def i64_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.int64)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.int64)
 
 
 def u8_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.uint8)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.uint8)
 
 
 def u16_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.uint16)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.uint16)
 
 
 def u32_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.uint32)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.uint32)
 
 
 def u64_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.uint64)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.uint64)
 
 
 def f16_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.float16)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.float16)
 
 
 def f32_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.float32)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.float32)
 
 
 def f64_tensor(tensor) -> Tensor:
-    return torch.tensor(tensor, device=config['device'], dtype=torch.float64)
+    return torch.tensor(list(tensor), device=config['device'], dtype=torch.float64)
 
 
 byte_tensor = u8_tensor

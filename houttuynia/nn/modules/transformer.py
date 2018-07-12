@@ -4,7 +4,7 @@ from torch.nn import init
 from torch.nn import functional as F
 from torch import nn
 
-from houttuynia.nn.modules.conv import GramConv1
+from houttuynia.nn.modules.conv import GramConv1d
 
 __all__ = [
     'MultiHead',
@@ -69,7 +69,7 @@ class TransformerEncoderBlock(nn.Module):
 
         self.head = MultiHead(num_heads=num_heads, out_features=in_features)
         self.norm = nn.LayerNorm(normalized_shape=in_features)
-        self.conv = GramConv1(in_features=in_features, num_grams=num_grams, bias=bias)
+        self.conv = GramConv1d(in_features=in_features, num_grams=num_grams, bias=bias)
 
         self.reset_parameters()
 

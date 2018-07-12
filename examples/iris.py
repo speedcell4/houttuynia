@@ -5,30 +5,62 @@ from torch import nn, optim
 
 from houttuynia.monitors import get_monitor
 from houttuynia.schedule import EpochalSchedule
-from houttuynia.nn import Classifier
 from houttuynia import to_device
-from houttuynia.data_loader import prepare_iris_dataset
+from houttuynia.data_loader import iris_data_loader
 from houttuynia.extensions import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
 from houttuynia.utils import launch_expt
 
 
-class IrisEstimator(Classifier):
+class IrisEstimator(nn.Module):
     def __init__(self, in_features: int, num_classes: int, hidden_features: int, dropout: float,
                  bias: bool, negative_slope: float) -> None:
+        super(IrisEstimator, self).__init__()
+
         self.dropout = dropout
         self.in_features = in_features
         self.num_classes = num_classes
         self.hidden_features = hidden_features
         self.negative_slope = negative_slope
 
-        super(IrisEstimator, self).__init__(estimator=nn.Sequential(
+        self.estimator = nn.Sequential(
             nn.Dropout(dropout),
             nn.Linear(in_features, hidden_features, bias),
             nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
             nn.Linear(hidden_features, hidden_features, bias),
             nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
             nn.Linear(hidden_features, num_classes, bias),
-        ))
+        )
+
+        self.criterion = nn.CrossEntropyLoss(reduce=False)
+
+    def forward(self, data):
+        return self.estimator(data)
+
+    def fit(self, batch):
+        data, targets = batch
+        outputs = self(data)
+        loss = self.criterion(outputs, targets)
+        classification_pred = outputs.max(-1)[-1]
+        acc = (classification_pred == targets).float()
+        return loss.sum(0) / loss.size(0), {
+            'loss': loss.tolist(),
+            'acc': acc.tolist(),
+            # 'classification_targets': targets.long().tolist(),
+            # 'classification_predictions': classification_pred.long().tolist(),
+        }
+
+    def evaluate(self, batch):
+        data, targets = batch
+        outputs = self(data)
+        loss = self.criterion(outputs, targets)
+        classification_pred = outputs.max(-1)[-1]
+        acc = (classification_pred == targets).float()
+        return {
+            'loss': loss.tolist(),
+            'acc': acc.tolist(),
+            # 'classification_targets': targets.long().tolist(),
+            # 'classification_predictions': classification_pred.long().tolist(),
+        }
 
 
 app = aku.App(__file__)
@@ -38,7 +70,7 @@ app = aku.App(__file__)
 def train(hidden_features: int = 100, dropout: float = 0.05,
           bias: bool = True, negative_slope: float = 0.05,
           seed: int = 42, device: int = -1, batch_size: int = 5, num_epochs: int = 50, commit_inv: int = 5,
-          out_dir: Path = Path('../out_dir'), monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
+          out_dir: Path = Path('../out'), monitor: ('filesystem', 'tensorboard') = 'filesystem'):
     """ train iris classifier
 
     Args:
@@ -56,11 +88,11 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
     """
     expt_dir = launch_expt(**locals())
 
-    train_loader, test_loader = prepare_iris_dataset(batch_size=batch_size)
+    train_loader, test_loader = iris_data_loader(batch_size=batch_size)
 
     estimator = IrisEstimator(4, 3, 100, dropout=dropout, bias=bias, negative_slope=negative_slope)
     optimizer = optim.Adam(estimator.parameters())
-    monitor = get_monitor(monitor)(log_dir=expt_dir)
+    monitor = get_monitor(monitor)(expt_dir=expt_dir)
 
     to_device(device, estimator)
 
@@ -71,9 +103,11 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
     schedule.after_epoch(epoch=1)(Evaluation(data_loader=test_loader, chapter='test'))
 
     schedule.after_iteration(iteration=commit_inv)(
-        CommitScalarByMean('criterion', 'acc', chapter='train'))
+        CommitScalarByMean('loss', 'acc', chapter='train'),
+    )
     schedule.after_epoch(epoch=1)(
-        CommitScalarByMean('criterion', 'acc', chapter='test'))
+        CommitScalarByMean('loss', 'acc', chapter='test'),
+    )
 
     return schedule.run(train_loader, num_epochs)
 

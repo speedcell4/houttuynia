@@ -1,1 +1,1 @@
-from .iris import prepare_iris_dataset
+from .iris import iris_data_loader

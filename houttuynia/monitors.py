@@ -1,6 +1,9 @@
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple, Type
 from functools import wraps
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import precision_recall_curve
+import matplotlib.pyplot as plt
 
 import numpy as np
 import torch
@@ -29,12 +32,13 @@ class Monitor(object):
     def __init__(self) -> None:
         self.memory: Dict[Tuple[str, str], List[float]] = {}
 
-    def query(self, chapter: str, *names: str) -> Iterable[Tuple[str, List[float]]]:
+    def query(self, chapter: str, *names: str, remove: bool = True) -> Iterable[Tuple[str, List[float]]]:
         for name in names:
             key = (name, chapter)
             if key in self.memory:
                 yield name, self.memory[key]
-                del self.memory[key]
+                if remove:
+                    del self.memory[key]
 
     @unwrap_chapter
     def report_scalars(self, chapter: str = None, **values: float) -> None:
@@ -73,12 +77,12 @@ class Monitor(object):
         raise NotImplementedError
 
     @unwrap_chapter
-    def commit_pr_curve(self, iteration: int, predictions: torch.Tensor, targets: torch.Tensor,
-                        num_thresholds: int = 127, weights: torch.Tensor = None,
-                        chapter: str = None) -> None:
+    def commit_pr_curve(self, name: str, iteration: int, predictions: torch.Tensor, targets: torch.Tensor,
+                        num_thresholds: int = 127, weights: torch.Tensor = None, chapter: str = None) -> None:
         """ save the predictions and targets to disk and plot the PR-curve
 
         Args:
+            name: the meaning
             iteration: global iteration (step)
             predictions: the predictions
             targets: the target labels
@@ -121,10 +125,10 @@ class Monitor(object):
 
 
 class FilesystemMonitor(Monitor):
-
-    def __init__(self, log_dir: Path, name: str = 'log.txt', encoding: str = 'utf-8') -> None:
+    def __init__(self, expt_dir: Path, name: str = 'log.txt', encoding: str = 'utf-8') -> None:
         super(FilesystemMonitor, self).__init__()
-        self.log_file = log_dir / name
+        self.expt_dir = expt_dir
+        self.log_file = expt_dir / name
         self.stream = self.log_file.open(mode='w', encoding=encoding)
 
     def __del__(self):
@@ -138,6 +142,27 @@ class FilesystemMonitor(Monitor):
             info = self._iteration_format.format(
                 iteration=iteration, name=name, chapter=chapter, value=value)
             print(info, file=self.stream)
+
+    # @unwrap_chapter
+    # def commit_pr_curve(self, name: str, iteration: int, predictions: torch.Tensor, targets: torch.Tensor,
+    #                     num_thresholds: int = 127, weights: torch.Tensor = None, chapter: str = None) -> None:
+    #     targets = targets.numpy()
+    #     predictions = predictions.numpy()
+    #     precision, recall, _ = precision_recall_curve(targets, predictions)
+    #     average_precision = average_precision_score(targets, predictions)
+    #     plt.step(recall, precision, color='b', alpha=0.2,
+    #              where='post')
+    #     plt.fill_between(recall, precision, step='post', alpha=0.2,
+    #                      color='b')
+    #
+    #     plt.xlabel('Recall')
+    #     plt.ylabel('Precision')
+    #     plt.ylim([0.0, 1.05])
+    #     plt.xlim([0.0, 1.0])
+    #     plt.title('2-class Precision-Recall curve: AP={0:0.2f}'.format(
+    #         average_precision))
+    #
+    #     return plt.imsave(self.log_file.with_name(f'{name}-prcurve-{iteration}.eps').__str__())
 
 
 class TensorboardMonitor(Monitor):
@@ -153,6 +178,14 @@ class TensorboardMonitor(Monitor):
         for name, value in values.items():
             self.summary_writer.add_scalars(
                 main_tag=name, tag_scalar_dict={chapter: value}, global_step=iteration)
+
+    # @unwrap_chapter
+    # def commit_pr_curve(self, name: str, iteration: int, predictions: torch.Tensor, targets: torch.Tensor,
+    #                     num_thresholds: int = 127, weights: torch.Tensor = None, chapter: str = None) -> None:
+    #     return self.summary_writer.add_pr_curve(
+    #         labels=targets, predictions=predictions, tag=name,
+    #         global_step=iteration, num_thresholds=num_thresholds,
+    #     )
 
 
 def get_monitor(name: str) -> Type[Monitor]:
