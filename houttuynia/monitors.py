@@ -1,9 +1,6 @@
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple, Type
 from functools import wraps
-from sklearn.metrics import average_precision_score
-from sklearn.metrics import precision_recall_curve
-import matplotlib.pyplot as plt
 
 import numpy as np
 import torch
