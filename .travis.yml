@@ -5,6 +5,9 @@ cache: pip
 git:
   depth: 3
   quiet: true
+branches:
+  only:
+  - /.*/
 python:
   - "3.6"
 install:
