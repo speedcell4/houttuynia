@@ -4,7 +4,7 @@ import torch
 from hypothesis import given
 from torch import nn
 
-import testing
+from houttuynia import testing
 from houttuynia.nn import DPN, DenseNet, MixNet, ResNet
 
 

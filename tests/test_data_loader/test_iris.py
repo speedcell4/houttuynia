@@ -1,6 +1,6 @@
 import unittest
 
-from data_loader import iris_data_loader
+from houttuynia.data_loader import iris_data_loader
 
 
 class TestIrisDataLoader(unittest.TestCase):

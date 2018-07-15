@@ -4,10 +4,10 @@ from unittest import TestCase
 import torch
 from hypothesis import given
 
-import testing
+from houttuynia import testing
 from houttuynia import byte_tensor, long_tensor
 from houttuynia.nn.modules.utils import lens_to_mask, cartesian_view
-from nn import expanded_masked_fill
+from houttuynia.nn import expanded_masked_fill
 
 
 class TestConvertLengthsToMask(TestCase):

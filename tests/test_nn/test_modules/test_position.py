@@ -3,7 +3,7 @@ import unittest
 import torch
 
 import houttuynia as ho
-from nn.modules.position import seq_pos_indexing
+from houttuynia.nn.modules.position import seq_pos_indexing
 
 
 class TestSeqPosIndexing(unittest.TestCase):
