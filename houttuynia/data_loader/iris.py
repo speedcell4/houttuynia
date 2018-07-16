@@ -4,7 +4,7 @@ from sklearn.datasets import load_iris
 import torch
 from torch.utils.data import DataLoader
 
-from houttuynia import float_tensor, long_tensor
+from houttuynia import float_tensor, long_tensor, config
 from houttuynia.data_loader import Dataset
 
 __all__ = [
@@ -32,8 +32,8 @@ class IrisDataset(Dataset):
 
     def collate_fn(self, instances: List[Instance]) -> Batch:
         data, targets = zip(*instances)
-        data = torch.stack(data, dim=0)
-        targets = torch.stack(targets, dim=0)
+        data = torch.stack(data, dim=0).to(config['device'])
+        targets = torch.stack(targets, dim=0).to(config['device'])
         return self.Batch(data, targets)
 
     @staticmethod
