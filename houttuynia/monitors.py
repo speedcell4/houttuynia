@@ -52,35 +52,35 @@ class Monitor(object):
                 self.memory.setdefault((name, chapter), []).append(value)
 
     @unwrap_chapter
-    def commit_scalars(self, iteration: int, chapter: str = None, **values: float) -> None:
-        """ save `values` to disk with (iteration, chapter) information.
+    def commit_scalars(self, global_step: int, chapter: str = None, **values: float) -> None:
+        """ save `values` to disk with (global_step, chapter) information.
 
         Args:
-            iteration: global iteration (step)
+            global_step: global step
             chapter: chapter name
             **values: the name and value dict of criterion or metric
         """
         raise NotImplementedError
 
     @unwrap_chapter
-    def commit_kwargs(self, iteration: int, chapter: str = None, **kwargs: Any) -> None:
+    def commit_kwargs(self, global_step: int, chapter: str = None, **kwargs: Any) -> None:
         """ save the argument options to disk
 
         Args:
-            iteration: global iteration (step)
+            global_step: global step
             chapter: chapter name
             **kwargs: args dictionary
         """
         raise NotImplementedError
 
     @unwrap_chapter
-    def commit_pr_curve(self, name: str, iteration: int, predictions: torch.Tensor, targets: torch.Tensor,
+    def commit_pr_curve(self, name: str, global_step: int, predictions: torch.Tensor, targets: torch.Tensor,
                         num_thresholds: int = 127, weights: torch.Tensor = None, chapter: str = None) -> None:
         """ save the predictions and targets to disk and plot the PR-curve
 
         Args:
             name: the meaning
-            iteration: global iteration (step)
+            global_step: global step
             predictions: the predictions
             targets: the target labels
             num_thresholds: how many thresholds used to draw this curve
@@ -90,12 +90,12 @@ class Monitor(object):
         raise NotImplementedError
 
     @unwrap_chapter
-    def commit_embedding(self, iteration: int, embedding: torch.Tensor, name: str, label_text: List[str] = None,
+    def commit_embedding(self, global_step: int, embedding: torch.Tensor, name: str, label_text: List[str] = None,
                          label_image: torch.Tensor = None, chapter: str = None) -> None:
         """ save the embedding to disk and plot it
 
         Args:
-            iteration: global iteration (step)
+            global_step: global step
             embedding: the embedding tensor
             name: the name of embedding
             label_text: the label list (optional)
@@ -105,7 +105,7 @@ class Monitor(object):
         raise NotImplementedError
 
     @unwrap_chapter
-    def commit_histogram(self, iteration: int, values: np.ndarray, chapter: str = None) -> None:
+    def commit_histogram(self, global_step: int, values: np.ndarray, chapter: str = None) -> None:
         raise NotImplementedError
 
     @unwrap_chapter
@@ -131,17 +131,17 @@ class FilesystemMonitor(Monitor):
     def __del__(self):
         self.stream.close()
 
-    _iteration_format = '[iteration {iteration}] {name}/{chapter}\t{value:.06f}'
+    _global_step_format = '[global_step {global_step}] {name}/{chapter}\t{value:.06f}'
 
     @unwrap_chapter
-    def commit_scalars(self, iteration: int, chapter: str = None, **values: float) -> None:
+    def commit_scalars(self, global_step: int, chapter: str = None, **values: float) -> None:
         for name, value in values.items():
-            info = self._iteration_format.format(
-                iteration=iteration, name=name, chapter=chapter, value=value)
+            info = self._global_step_format.format(
+                global_step=global_step, name=name, chapter=chapter, value=value)
             print(info, file=self.stream)
 
     # @unwrap_chapter
-    # def commit_pr_curve(self, name: str, iteration: int, predictions: torch.Tensor, targets: torch.Tensor,
+    # def commit_pr_curve(self, name: str, global_step: int, predictions: torch.Tensor, targets: torch.Tensor,
     #                     num_thresholds: int = 127, weights: torch.Tensor = None, chapter: str = None) -> None:
     #     targets = targets.numpy()
     #     predictions = predictions.numpy()
@@ -159,7 +159,7 @@ class FilesystemMonitor(Monitor):
     #     plt.title('2-class Precision-Recall curve: AP={0:0.2f}'.format(
     #         average_precision))
     #
-    #     return plt.imsave(self.log_file.with_name(f'{name}-prcurve-{iteration}.eps').__str__())
+    #     return plt.imsave(self.log_file.with_name(f'{name}-prcurve-{global_step}.eps').__str__())
 
 
 class TensorboardMonitor(Monitor):
@@ -171,17 +171,17 @@ class TensorboardMonitor(Monitor):
         self.summary_writer.close()
 
     @unwrap_chapter
-    def commit_scalars(self, iteration: int, chapter: str = None, **values: float) -> None:
+    def commit_scalars(self, global_step: int, chapter: str = None, **values: float) -> None:
         for name, value in values.items():
             self.summary_writer.add_scalars(
-                main_tag=name, tag_scalar_dict={chapter: value}, global_step=iteration)
+                main_tag=name, tag_scalar_dict={chapter: value}, global_step=global_step)
 
     # @unwrap_chapter
-    # def commit_pr_curve(self, name: str, iteration: int, predictions: torch.Tensor, targets: torch.Tensor,
+    # def commit_pr_curve(self, name: str, global_step: int, predictions: torch.Tensor, targets: torch.Tensor,
     #                     num_thresholds: int = 127, weights: torch.Tensor = None, chapter: str = None) -> None:
     #     return self.summary_writer.add_pr_curve(
     #         labels=targets, predictions=predictions, tag=name,
-    #         global_step=iteration, num_thresholds=num_thresholds,
+    #         global_step=global_step, num_thresholds=num_thresholds,
     #     )
 
 
