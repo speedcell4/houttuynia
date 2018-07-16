@@ -163,9 +163,9 @@ class FilesystemMonitor(Monitor):
 
 
 class TensorboardMonitor(Monitor):
-    def __init__(self, log_dir: Path, comment: str = '') -> None:
+    def __init__(self, expt_dir: Path, comment: str = '') -> None:
         super(TensorboardMonitor, self).__init__()
-        self.summary_writer = SummaryWriter(log_dir=log_dir.__str__(), comment=comment)
+        self.summary_writer = SummaryWriter(log_dir=expt_dir.__str__(), comment=comment)
 
     def __del__(self):
         self.summary_writer.close()
