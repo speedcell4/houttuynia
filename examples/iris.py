@@ -69,7 +69,7 @@ app = aku.App(__file__)
 @app.register
 def train(hidden_features: int = 100, dropout: float = 0.05,
           bias: bool = True, negative_slope: float = 0.05,
-          seed: int = 42, device: int = -1, batch_size: int = 1, num_epochs: int = 50, commit_inv: int = 5,
+          seed: int = 42, device: int = -1, batch_size: int = 1, num_epochs: int = 50, commit_inr: int = 5,
           out_dir: Path = Path('../out'), monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
     """ train iris classifier
 
@@ -82,7 +82,7 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
         device: device id
         batch_size: the size of each batch
         num_epochs: the total numbers of epochs
-        commit_inv: commit interval
+        commit_inr: commit interval
         out_dir: the root path of output
         monitor: the type of monitor
     """
@@ -102,7 +102,7 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
     schedule.after_epoch(epoch=1)(Snapshot(expt_dir=expt_dir, iris_estimator=estimator))
     schedule.after_epoch(epoch=1)(Evaluation(data_loader=test_loader, chapter='test'))
 
-    schedule.after_iteration(iteration=commit_inv)(
+    schedule.after_iteration(iteration=commit_inr)(
         CommitScalarByMean('loss', 'acc', chapter='train'),
     )
     schedule.after_epoch(epoch=1)(

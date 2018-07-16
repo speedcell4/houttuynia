@@ -30,8 +30,11 @@ def ensure_output_dir(path: Path) -> Path:
 
 
 def git_hash(command: str = 'git rev-parse HEAD', shell: bool = True, encoding: str = 'utf-8') -> str:
-    commit = subprocess.check_output(command, shell=shell)
-    return str(commit, encoding=encoding).strip()
+    try:
+        commit = subprocess.check_output(command, shell=shell)
+        return str(commit, encoding=encoding).strip()
+    except subprocess.CalledProcessError:
+        return 'nogit'
 
 
 def datetime_hash(time_format: str = r'%y-%m%d-%H%M%S') -> str:

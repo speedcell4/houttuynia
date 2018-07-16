@@ -4,7 +4,6 @@ from typing import List, Tuple
 from torch import optim
 from torch.utils.data import DataLoader
 
-from houttuynia.extensions import StartWatch, StopWatch, WarningUnused
 from houttuynia.monitors import Monitor
 from houttuynia.nn import Architecture
 
@@ -108,7 +107,7 @@ class Schedule(object):
         raise NotImplementedError
 
 
-
+from houttuynia.extensions import StartWatch, StopWatch, WarningUnused
 
 
 class EpochalSchedule(Schedule):
