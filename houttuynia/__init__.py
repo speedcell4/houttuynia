@@ -6,7 +6,6 @@ from torch import nn
 import numpy as np
 
 from houttuynia import log_system
-from houttuynia.vocabulary import *
 
 
 class Configuration(dict):

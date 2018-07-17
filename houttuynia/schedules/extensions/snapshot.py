@@ -3,7 +3,7 @@ from pathlib import Path
 import torch
 from torch import nn
 
-from houttuynia.schedule import Extension, Schedule
+from houttuynia.schedules import Extension, Schedule
 
 __all__ = [
     'Snapshot',

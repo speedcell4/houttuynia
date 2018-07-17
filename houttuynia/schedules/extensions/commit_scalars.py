@@ -1,4 +1,4 @@
-from houttuynia.schedule import Extension, Schedule
+from houttuynia.schedules import Extension, Schedule
 from houttuynia import long_tensor
 
 __all__ = [

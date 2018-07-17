@@ -3,11 +3,10 @@ from pathlib import Path
 import aku
 from torch import nn, optim
 
-from houttuynia.monitors import get_monitor
-from houttuynia.schedule import EpochalSchedule
+from houttuynia.schedules import EpochalSchedule, get_monitor
 from houttuynia import to_device
 from houttuynia.data_loader import iris_data_loader
-from houttuynia.extensions import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
+from houttuynia.schedules import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
 from houttuynia.utils import launch_expt
 
 

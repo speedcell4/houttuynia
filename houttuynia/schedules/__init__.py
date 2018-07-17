@@ -4,8 +4,7 @@ from typing import List, Tuple
 from torch import optim
 from torch.utils.data import DataLoader
 
-from houttuynia.monitors import Monitor
-from houttuynia.nn import Architecture
+from .monitors import *
 
 __all__ = ['Moment', 'Trigger', 'Extension', 'Schedule', 'EpochalSchedule']
 
@@ -55,7 +54,7 @@ class Extension(object):
 
 
 class Schedule(object):
-    def __init__(self, estimator: Architecture, optimizer, monitor: Monitor) -> None:
+    def __init__(self, estimator, optimizer, monitor: Monitor) -> None:
         super(Schedule, self).__init__()
 
         self.monitor = monitor
@@ -64,7 +63,6 @@ class Schedule(object):
 
         self.extensions: List[Tuple[Trigger, Extension]] = []
 
-        self.instance = 0
         self.iteration = 0
 
     def register_extension(self, trigger: Trigger):
@@ -107,12 +105,13 @@ class Schedule(object):
         raise NotImplementedError
 
 
-from houttuynia.extensions import StartWatch, StopWatch, WarningUnused
+from .extensions import *
 
 
 class EpochalSchedule(Schedule):
-    def __init__(self, estimator: Architecture, optimizer: optim.Optimizer, monitor: Monitor) -> None:
+    def __init__(self, estimator, optimizer: optim.Optimizer, monitor: Monitor) -> None:
         super().__init__(estimator=estimator, optimizer=optimizer, monitor=monitor)
+
         self.epoch = 0
 
         self.before_epoch(epoch=1)(StartWatch('epoch'))
@@ -129,8 +128,6 @@ class EpochalSchedule(Schedule):
 
             for batch in data_loader:
                 self.iteration += 1
-                self.instance += data_loader.dataset.get_batch_size(batch)
-
                 self.trigger_extension(Moment.BEFORE_ITERATION)
 
                 self.estimator.train()

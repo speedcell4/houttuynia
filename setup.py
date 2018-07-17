@@ -7,7 +7,8 @@ setup(
     packages=[
         'houttuynia',
         'houttuynia.data_loader',
-        'houttuynia.extensions',
+        'houttuynia.schedules',
+        'houttuynia.schedules.extensions',
         'houttuynia.nn',
         'houttuynia.nn.modules',
         'houttuynia.nn.utils',
