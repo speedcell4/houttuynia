@@ -15,14 +15,14 @@ class PiecewiseMaxPool1d(nn.Module):
         """
 
         Args:
-            inputs: (*batch, in_features)
-            mask: (*batch, )
+            inputs: (batch, channel, in_features)
+            mask: (batch, channel)
 
         Returns:
-            (*batch, num_pieces, out_features)
+            (batch, channel, num_pieces, out_features)
         """
         outputs = []
-        for ix in range(self.num_pieces):
+        for ix in range(1, self.num_pieces + 1):
             y = self.pool(inputs.masked_fill(mask.unsqueeze(-1) != ix, -float('inf')))
             outputs.append(y.masked_fill_(y == -float('inf'), 0.))
         return torch.stack(outputs, dim=-2)
