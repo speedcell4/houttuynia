@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from houttuynia import Vocab
+from houttuynia.vocabulary import Vocab
 
 
 class TestVocab(TestCase):

@@ -8,6 +8,7 @@ from houttuynia import to_device
 from houttuynia.data_loader import iris_data_loader
 from houttuynia.schedules import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
 from houttuynia.utils import launch_expt
+from examples import project_dir
 
 
 class IrisEstimator(nn.Module):
@@ -69,7 +70,7 @@ app = aku.App(__file__)
 def train(hidden_features: int = 100, dropout: float = 0.05,
           bias: bool = True, negative_slope: float = 0.05,
           seed: int = 42, device: int = -1, batch_size: int = 1, num_epochs: int = 50, commit_inr: int = 5,
-          out_dir: Path = Path('../out'), monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
+          out_dir: Path = project_dir / 'out', monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
     """ train iris classifier
 
     Args:
@@ -89,7 +90,10 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
 
     train_loader, test_loader = iris_data_loader(batch_size=batch_size)
 
-    estimator = IrisEstimator(4, 3, 100, dropout=dropout, bias=bias, negative_slope=negative_slope)
+    estimator = IrisEstimator(
+        in_features=4, num_classes=3, hidden_features=hidden_features,
+        dropout=dropout, bias=bias, negative_slope=negative_slope,
+    )
     optimizer = optim.Adam(estimator.parameters())
     monitor = get_monitor(monitor)(expt_dir=expt_dir)
 
