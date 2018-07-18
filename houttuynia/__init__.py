@@ -5,7 +5,7 @@ import torch
 from torch import nn
 import numpy as np
 
-from houttuynia import log_system
+from houttuynia import log_system as logging
 
 
 class Configuration(dict):
@@ -20,7 +20,7 @@ class Configuration(dict):
 
 
 config = Configuration(
-    handler=log_system.push_stream_handler(),
+    handler=logging.push_stream_handler(),
     chapter='train',
 )
 
