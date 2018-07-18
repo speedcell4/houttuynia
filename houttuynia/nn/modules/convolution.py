@@ -45,7 +45,7 @@ class GramConv1d(nn.Sequential):
             Conv1d(in_channels=hidden_features, out_channels=hidden_features,
                    stride=1, bias=bias, kernel_size=num_grams, padding=num_grams // 2),
             nn.LeakyReLU(negative_slope=negative_slope, inplace=True),
-            Conv1d(in_channels=hidden_features, out_channels=hidden_features,
+            Conv1d(in_channels=hidden_features, out_channels=out_features,
                    stride=1, bias=bias, kernel_size=1, padding=0),
         )
 
