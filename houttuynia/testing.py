@@ -10,7 +10,8 @@ SMALL_BATCHES = st.lists(SMALL_BATCH, min_size=1, max_size=3)
 
 BATCH = st.integers(1, 20)
 BATCHES = st.lists(BATCH, min_size=1, max_size=5)
-TIMES = st.integers(1, 50)
+
+CHANNEL = TIMES = st.integers(1, 50)
 
 TINY_FEATURE = st.integers(5, 20)
 SMALL_FEATURE = st.integers(20, 100)
@@ -35,7 +36,6 @@ def _sequences(draw, vocab_size=VOCAB_SIZE) -> SearchStrategy:
 
 
 SEQUENCES = _sequences()
-
 
 # def batched_lens(batch: int, min_len: int, max_len: int) -> List[int]:
 #     return st.lists(st.integers(min_len, max_len), min_size=batch, max_size=batch).example()
