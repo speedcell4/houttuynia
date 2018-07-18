@@ -1,4 +1,4 @@
-from houttuynia.nn.modules.conv import *
+from houttuynia.nn.modules.convolution import *
 from houttuynia.nn.modules.rnn import *
 from houttuynia.nn.modules.utils import *
 from houttuynia.nn.modules.functional import *
