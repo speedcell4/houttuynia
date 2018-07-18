@@ -2,7 +2,7 @@ PROJECT_DIR = ${CURDIR}
 BIN_DIR = ${PROJECT_DIR}/venv/bin
 PYTHON = PYTHONPATH=${PROJECT_DIR} ${BIN_DIR}/python3.6
 
-${BIN_DIR}/python3:
+${BIN_DIR}/python3.6:
 	virtualenv --python=python3.6 venv
 
 ${BIN_DIR}/jupyter:
