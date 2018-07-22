@@ -1,5 +1,3 @@
-from typing import List
-
 from hypothesis import strategies as st
 from hypothesis.searchstrategy import SearchStrategy
 
@@ -12,6 +10,10 @@ BATCH = st.integers(1, 20)
 BATCHES = st.lists(BATCH, min_size=1, max_size=5)
 
 CHANNEL = TIMES = st.integers(1, 50)
+
+NUM_GRAMS = st.sampled_from([1, 3, 5, 7, 9])
+NUM_HEADS = st.integers(1, 5)
+NUM_LAYERS = st.integers(1, 5)
 
 TINY_FEATURE = st.integers(5, 20)
 SMALL_FEATURE = st.integers(20, 100)
