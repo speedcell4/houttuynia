@@ -24,9 +24,9 @@ tensorboard: ${BIN_DIR}/tensorboard
 	${BIN_DIR}/tensorboard --logdir ${PROJECT_DIR}/out --host 0.0.0.0
 
 .PHONY:
-test: ${BIN_DIR}/python3 ${PROJECT_DIR}/.dep ${PROJECT_DIR}/tests
+test: ${BIN_DIR}/python3.6 ${PROJECT_DIR}/.dep ${PROJECT_DIR}/tests
 	$(PYTHON) -m unittest discover -s ${PROJECT_DIR}/tests -t ${PROJECT_DIR}/tests
 
 .PHONY:
-iris: ${BIN_DIR}/python3 ${PROJECT_DIR}/.dep ${PROJECT_DIR}/examples/iris.py
+iris: ${BIN_DIR}/python3.6 ${PROJECT_DIR}/.dep ${PROJECT_DIR}/examples/iris.py
 	$(PYTHON) ${PROJECT_DIR}/examples/iris.py

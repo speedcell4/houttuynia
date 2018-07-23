@@ -3,10 +3,23 @@ from pathlib import Path
 import aku
 from torch import nn, optim
 
+import numpy as np
+from numpy.random import RandomState
+from matplotlib import pyplot as plt
+
+import torch
+from torch.nn import init
+from torch.nn import functional as F
+from torch.autograd import Variable
+from torch.utils.data import Dataset, DataLoader
+from torch import nn, cuda, initial_seed, autograd, optim
+from torch.nn.utils.rnn import PackedSequence, pad_sequence, pad_packed_sequence
+
+import houttuynia as ho
 from houttuynia.schedules import EpochalSchedule, get_monitor
 from houttuynia import to_device
 from houttuynia.data_loader import iris_data_loader
-from houttuynia.schedules import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
+from houttuynia.schedules import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot, AUC
 from houttuynia.utils import launch_expt
 from examples import project_dir
 
@@ -31,35 +44,35 @@ class IrisEstimator(nn.Module):
             nn.Linear(hidden_features, num_classes, bias),
         )
 
-        self.criterion = nn.CrossEntropyLoss(reduce=False)
+        self.criterion = nn.CrossEntropyLoss(reduce=True)
 
     def forward(self, data):
         return self.estimator(data)
 
     def fit(self, batch):
         data, targets = batch
-        outputs = self(data)
-        loss = self.criterion(outputs, targets)
-        classification_pred = outputs.max(-1)[-1]
-        acc = (classification_pred == targets).float()
-        return loss.sum(0) / loss.size(0), {
-            'loss': loss.tolist(),
+        logits = self(data)
+        loss = self.criterion(logits, targets)
+
+        outputs = logits.argmax(-1)
+        acc = (outputs == targets).float()
+        return loss, {
+            'loss': loss.item(),
             'acc': acc.tolist(),
-            # 'classification_targets': targets.long().tolist(),
-            # 'classification_predictions': classification_pred.long().tolist(),
         }
 
     def evaluate(self, batch):
         data, targets = batch
-        outputs = self(data)
-        loss = self.criterion(outputs, targets)
-        classification_pred = outputs.max(-1)[-1]
-        acc = (classification_pred == targets).float()
+        logits = self(data)
+        loss = self.criterion(logits, targets)
+
+        outputs = logits.argmax(-1)
+        acc = (outputs == targets).float()
         return {
-            'loss': loss.tolist(),
+            'loss': loss.item(),
             'acc': acc.tolist(),
-            # 'classification_targets': targets.long().tolist(),
-            # 'classification_predictions': classification_pred.long().tolist(),
+            'iris_probs': F.softmax(logits, dim=-1).tolist(),
+            'iris_targets': targets.tolist(),
         }
 
 
@@ -110,6 +123,9 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
     )
     schedule.after_epoch(epoch=1)(
         CommitScalarByMean('loss', 'acc', chapter='test'),
+    )
+    schedule.after_epoch(epoch=1)(
+        AUC(num_classes=3, chapter='test', name='iris'),
     )
 
     return schedule.run(train_loader, num_epochs)
