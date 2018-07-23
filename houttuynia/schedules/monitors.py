@@ -26,8 +26,17 @@ def unwrap_chapter(func):
 
 
 class Monitor(object):
-    def __init__(self) -> None:
+    def __init__(self, expt_dir: Path) -> None:
+        self.expt_dir = expt_dir
         self.memory: Dict[Tuple[str, str], List[float]] = {}
+
+    def contains(self, chapter: str, name: str):
+        return (name, chapter) in self.memory
+
+    def get(self, chapter: str, name: str):
+        value = self.memory[(name, chapter)]
+        del self.memory[(name, chapter)]
+        return value
 
     def query(self, chapter: str, *names: str, remove: bool = True) -> Iterable[Tuple[str, List[float]]]:
         for name in names:
@@ -123,8 +132,7 @@ class Monitor(object):
 
 class FilesystemMonitor(Monitor):
     def __init__(self, expt_dir: Path, name: str = 'log.txt', encoding: str = 'utf-8') -> None:
-        super(FilesystemMonitor, self).__init__()
-        self.expt_dir = expt_dir
+        super(FilesystemMonitor, self).__init__(expt_dir=expt_dir)
         self.log_file = expt_dir / name
         self.stream = self.log_file.open(mode='w', encoding=encoding)
 
@@ -164,7 +172,7 @@ class FilesystemMonitor(Monitor):
 
 class TensorboardMonitor(Monitor):
     def __init__(self, expt_dir: Path, comment: str = '') -> None:
-        super(TensorboardMonitor, self).__init__()
+        super(TensorboardMonitor, self).__init__(expt_dir=expt_dir)
         self.summary_writer = SummaryWriter(log_dir=expt_dir.__str__(), comment=comment)
 
     def __del__(self):
