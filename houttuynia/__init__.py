@@ -4,8 +4,11 @@ from torch import Tensor
 import torch
 from torch import nn
 import numpy as np
+import matplotlib
 
 from houttuynia import log_system as logging
+
+matplotlib.use('agg')
 
 
 class Configuration(dict):
