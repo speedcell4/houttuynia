@@ -1,25 +1,13 @@
 from pathlib import Path
 
 import aku
+from torch.nn import functional as F
 from torch import nn, optim
 
-import numpy as np
-from numpy.random import RandomState
-from matplotlib import pyplot as plt
-
-import torch
-from torch.nn import init
-from torch.nn import functional as F
-from torch.autograd import Variable
-from torch.utils.data import Dataset, DataLoader
-from torch import nn, cuda, initial_seed, autograd, optim
-from torch.nn.utils.rnn import PackedSequence, pad_sequence, pad_packed_sequence
-
-import houttuynia as ho
 from houttuynia.schedules import EpochalSchedule, get_monitor
 from houttuynia import to_device
 from houttuynia.data_loader import iris_data_loader
-from houttuynia.schedules import ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot, AUC
+from houttuynia.schedules import ClipGradNorm, CommitScalarByMean, Evaluation, PRCurve, Snapshot
 from houttuynia.utils import launch_expt
 from examples import project_dir
 
@@ -125,7 +113,7 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
         CommitScalarByMean('loss', 'acc', chapter='test'),
     )
     schedule.after_epoch(epoch=1)(
-        AUC(num_classes=3, chapter='test', name='iris'),
+        PRCurve(num_classes=3, chapter='test', name='iris'),
     )
 
     return schedule.run(train_loader, num_epochs)

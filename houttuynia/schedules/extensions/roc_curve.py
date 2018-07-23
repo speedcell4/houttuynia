@@ -10,7 +10,7 @@ from houttuynia.schedules import Extension, Schedule
 
 
 # from: http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html
-def plot_roc(y_test, y_score, n_classes: int, path: Path):
+def _measure_and_plot(y_test, y_score, n_classes: int, path: Path):
     fpr = dict()
     tpr = dict()
     roc_auc = dict()
@@ -61,9 +61,11 @@ def plot_roc(y_test, y_score, n_classes: int, path: Path):
     return float(roc_auc['micro']), float(roc_auc['macro'])
 
 
-class AUC(Extension):
+class ROCCurve(Extension):
+    filename = r'roc_curve_{iteration}.png'
+
     def __init__(self, num_classes: int, chapter: str, name: str):
-        super(AUC, self).__init__()
+        super(ROCCurve, self).__init__()
         self.num_classes = num_classes
         self.chapter = chapter
         self.name = name
@@ -80,9 +82,9 @@ class AUC(Extension):
             probs = np.array(probs, dtype=np.float)
             targets = np.array(targets, dtype=np.int)
             targets = label_binarize(targets, range(self.num_classes))
-            path = schedule.monitor.expt_dir / f'roc_{schedule.iteration}.png'
-            micro, macro = plot_roc(y_test=targets, y_score=probs, n_classes=self.num_classes, path=path)
+            path = schedule.monitor.expt_dir / self.filename.format(iteration=schedule.iteration)
+            micro, macro = _measure_and_plot(y_test=targets, y_score=probs, n_classes=self.num_classes, path=path)
             schedule.monitor.commit_scalars(global_step=schedule.iteration, chapter=self.chapter, **{
-                f'{self.name}_micro': micro,
-                f'{self.name}_macro': macro,
+                f'{self.name}_roc_micro_auc': micro,
+                f'{self.name}_roc_macro_auc': macro,
             })
