@@ -37,8 +37,7 @@ class IrisEstimator(nn.Module):
     def forward(self, data):
         return self.estimator(data)
 
-    def fit(self, batch):
-        data, targets = batch
+    def fit(self, data, targets):
         logits = self(data)
         loss = self.criterion(logits, targets)
 
@@ -49,8 +48,7 @@ class IrisEstimator(nn.Module):
             'acc': acc.tolist(),
         }
 
-    def evaluate(self, batch):
-        data, targets = batch
+    def evaluate(self, data, targets):
         logits = self(data)
         loss = self.criterion(logits, targets)
 
@@ -70,7 +68,7 @@ app = aku.App(__file__)
 @app.register
 def train(hidden_features: int = 100, dropout: float = 0.05,
           bias: bool = True, negative_slope: float = 0.05,
-          seed: int = 42, device: int = -1, batch_size: int = 1, num_epochs: int = 50, commit_inr: int = 5,
+          seed: int = 0, device: int = -1, batch_size: int = 1, num_epochs: int = 50, commit_inr: int = 5,
           out_dir: Path = project_dir / 'out', monitor: ('filesystem', 'tensorboard') = 'tensorboard'):
     """ train iris classifier
 

@@ -5,6 +5,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 
 from .monitors import *
+from houttuynia.schedules.utils import apply_batch
 
 
 @enum.unique
@@ -130,7 +131,7 @@ class EpochalSchedule(Schedule):
 
                 self.estimator.train()
                 self.optimizer.zero_grad()
-                self.criterion, self.metrics = self.estimator.fit(batch)
+                self.criterion, self.metrics = apply_batch(self.estimator.fit, batch)
                 self.monitor.report_scalars(**self.metrics)
 
                 self.trigger_extension(Moment.BEFORE_BACKWARD)
