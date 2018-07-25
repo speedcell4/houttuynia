@@ -39,11 +39,13 @@ def _measure_and_plot(y_score, y_test, n_classes: int, path: Path):
 class PRCurve(Extension):
     filename = r'pr_curve_{iteration}.png'
 
-    def __init__(self, num_classes: int, chapter: str, name: str):
+    def __init__(self, num_classes: int, chapter: str, name: str, dump_data: bool = False):
         super(PRCurve, self).__init__()
-        self.num_classes = num_classes
-        self.chapter = chapter
+
         self.name = name
+        self.chapter = chapter
+        self.dump_data = dump_data
+        self.num_classes = num_classes
 
     def __call__(self, schedule: 'Schedule') -> None:
         if not schedule.monitor.contains(self.chapter, f'{self.name}_probs'):
@@ -58,8 +60,11 @@ class PRCurve(Extension):
             probs = np.array(probs, dtype=np.float)
             targets = np.array(targets, dtype=np.int)
 
-            np.save(str(schedule.monitor.expt_dir / f'pr_probs_{schedule.iteration}.npy'), probs)
-            np.save(str(schedule.monitor.expt_dir / f'pr_targets_{schedule.iteration}.npy'), targets)
+            if self.dump_data:
+                self.dump_arrays(schedule=schedule, **{
+                    f'{self.name}_probs': probs,
+                    f'{self.name}_targets': targets,
+                })
 
             targets = label_binarize(targets, range(self.num_classes))
             path = schedule.monitor.expt_dir / self.filename.format(iteration=schedule.iteration)

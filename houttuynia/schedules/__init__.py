@@ -1,11 +1,11 @@
 import enum
-from typing import List, Tuple
+from typing import List, Tuple, NoReturn
 
 from torch import optim
 from torch.utils.data import DataLoader
+from houttuynia.schedules.utils import apply_arguments
 
 from .monitors import *
-from houttuynia.schedules.utils import apply_arguments
 
 
 @enum.unique
@@ -51,6 +51,15 @@ class Extension(object):
     def __call__(self, schedule: 'Schedule') -> None:
         raise NotImplementedError
 
+    @staticmethod
+    def dump_arrays(schedule: 'Schedule', **arrays) -> NoReturn:
+        for name, array in arrays.items():
+            path = schedule.monitor.expt_dir / 'dump'
+            if not path.exists():
+                path.mkdir(parents=True, exist_ok=True)
+            filename = f'{name}_{schedule.global_step}.npy'
+            np.save((path / filename).__str__(), array)
+
 
 class Schedule(object):
     def __init__(self, estimator, optimizer, monitor: Monitor) -> None:
@@ -63,6 +72,10 @@ class Schedule(object):
         self.extensions: List[Tuple[Trigger, Extension]] = []
 
         self.iteration = 0
+
+    @property
+    def global_step(self) -> int:
+        return self.iteration
 
     def register_extension(self, trigger: Trigger):
         def wrapper(extension: Extension) -> Extension:
@@ -117,6 +130,10 @@ class EpochalSchedule(Schedule):
         self.after_epoch(epoch=1)(StopWatch('epoch'))
 
         self.after_run()(WarningUnused())
+
+    @property
+    def global_step(self) -> int:
+        return self.epoch
 
     def run(self, data_loader: DataLoader, num_epochs: int):
         self.trigger_extension(Moment.BEFORE_RUN)
