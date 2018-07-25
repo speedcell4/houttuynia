@@ -1,13 +1,11 @@
 from pathlib import Path
 
 import aku
-from torch.nn import functional as F
 from torch import nn, optim
-
 from houttuynia.schedules import EpochalSchedule, get_monitor
 from houttuynia import to_device
 from houttuynia.data_loader import iris_data_loader
-from houttuynia.schedules import ClipGradNorm, CommitScalarByMean, Evaluation, PRCurve, Snapshot
+from houttuynia.schedules import ClassificationMetrics, ClipGradNorm, CommitScalarByMean, Evaluation, Snapshot
 from houttuynia.utils import launch_expt
 from examples import project_dir
 
@@ -42,10 +40,10 @@ class IrisEstimator(nn.Module):
         loss = self.criterion(logits, targets)
 
         outputs = logits.argmax(-1)
-        acc = (outputs == targets).float()
         return loss, {
             'loss': loss.item(),
-            'acc': acc.tolist(),
+            'iris_outputs': outputs.tolist(),
+            'iris_targets': targets.tolist(),
         }
 
     def evaluate(self, data, targets):
@@ -53,11 +51,9 @@ class IrisEstimator(nn.Module):
         loss = self.criterion(logits, targets)
 
         outputs = logits.argmax(-1)
-        acc = (outputs == targets).float()
         return {
             'loss': loss.item(),
-            'acc': acc.tolist(),
-            'iris_probs': F.softmax(logits, dim=-1).tolist(),
+            'iris_outputs': outputs.tolist(),
             'iris_targets': targets.tolist(),
         }
 
@@ -105,13 +101,16 @@ def train(hidden_features: int = 100, dropout: float = 0.05,
     schedule.after_epoch(epoch=1)(Evaluation(data_loader=test_loader, chapter='test'))
 
     schedule.after_iteration(iteration=commit_inr)(
-        CommitScalarByMean('loss', 'acc', chapter='train'),
+        CommitScalarByMean('loss', chapter='train'),
+    )
+    schedule.after_iteration(iteration=commit_inr)(
+        ClassificationMetrics(chapter='train', name='iris'),
     )
     schedule.after_epoch(epoch=1)(
-        CommitScalarByMean('loss', 'acc', chapter='test'),
+        CommitScalarByMean('loss', chapter='test'),
     )
     schedule.after_epoch(epoch=1)(
-        PRCurve(num_classes=3, chapter='test', name='iris'),
+        ClassificationMetrics(chapter='test', name='iris', dump_data=True),
     )
 
     return schedule.run(train_loader, num_epochs)
