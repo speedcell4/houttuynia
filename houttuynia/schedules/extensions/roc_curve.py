@@ -79,8 +79,13 @@ class ROCCurve(Extension):
         if schedule.monitor.contains(self.chapter, f'{self.name}_targets'):
             probs = schedule.monitor.get(self.chapter, f'{self.name}_probs')
             targets = schedule.monitor.get(self.chapter, f'{self.name}_targets')
+
             probs = np.array(probs, dtype=np.float)
             targets = np.array(targets, dtype=np.int)
+
+            np.save(str(schedule.monitor.expt_dir / f'roc_probs_{schedule.iteration}.npy'), probs)
+            np.save(str(schedule.monitor.expt_dir / f'roc_targets_{schedule.iteration}.npy'), targets)
+
             targets = label_binarize(targets, range(self.num_classes))
             path = schedule.monitor.expt_dir / self.filename.format(iteration=schedule.iteration)
             micro, macro = _measure_and_plot(y_test=targets, y_score=probs, n_classes=self.num_classes, path=path)
