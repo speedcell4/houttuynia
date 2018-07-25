@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 import torch
 
-from houttuynia.schedules.utils import apply_batch
+from houttuynia.schedules.utils import apply_arguments
 from houttuynia.schedules import Extension, Schedule
 from houttuynia.context_managers import using_config
 
@@ -21,5 +21,5 @@ class Evaluation(Extension):
             schedule.estimator.eval()
 
             for batch in self.data_loader:
-                metrics = apply_batch(schedule.estimator.evaluate, batch)
+                metrics = apply_arguments(schedule.estimator.evaluate, batch)
                 schedule.monitor.report_scalars(**metrics)

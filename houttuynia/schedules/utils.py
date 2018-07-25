@@ -1,11 +1,13 @@
 __all__ = [
-    'apply_batch',
+    'apply_arguments',
 ]
 
 
-def apply_batch(func, batch):
-    if isinstance(batch, (list, tuple)):
-        return func(*batch)
-    if isinstance(batch, dict):
-        return func(**batch)
-    return func(batch)
+def apply_arguments(func, arguments):
+    if isinstance(arguments, tuple) and hasattr(arguments, '_asdict'):
+        return func(**arguments._asdict())
+    if isinstance(arguments, (list, tuple)):
+        return func(*arguments)
+    if isinstance(arguments, dict):
+        return func(**arguments)
+    return func(arguments)
