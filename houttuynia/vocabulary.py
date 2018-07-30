@@ -43,19 +43,19 @@ class Vocab(object):
         return self.counter.update(iteration)
 
     def build_vocab(self, max_vocab_size: int = None, min_freq: int = 1) -> None:
-        self._token_ix = {}
-        self._ix_token = {}
+        self.token_index = {}
+        self.index_token = {}
         for ix, (token, freq) in tqdm(
                 enumerate(self.__iter__()), desc=f'{self.__class__.__name__}', unit=' tokens'):
             if freq < min_freq:
                 break
             if max_vocab_size is not None and max_vocab_size <= ix:
                 break
-            self._token_ix[token] = ix
-            self._ix_token[ix] = token
+            self.token_index[token] = ix
+            self.index_token[ix] = token
 
         for sp in self.specials:
-            setattr(self, sp[1:-1], self._token_ix[sp])
+            setattr(self, sp[1:-1], self.token_index[sp])
 
         self._built = True
 
@@ -83,7 +83,7 @@ class Vocab(object):
     @property
     @built_required
     def tokens(self) -> Tuple[str, ...]:
-        return tuple(self._token_ix.keys())
+        return tuple(self.token_index.keys())
 
     def __iter__(self) -> Iterable[Tuple[str, Union[int, float]]]:
         for token in self.specials:
@@ -100,24 +100,28 @@ class Vocab(object):
 
     @built_required
     def __contains__(self, token: str) -> bool:
-        return token in self._token_ix
+        return token in self.token_index
 
     @built_required
     def __len__(self) -> int:
-        return self._token_ix.__len__()
+        return self.token_index.__len__()
 
     @built_required
-    def __call__(self, item: Union[int, Iterable[str]]) -> Union[int, Iterable[int]]:
-        if isinstance(item, int):
+    def __call__(self, token: Union[int, Iterable[str]]) -> Union[int, Iterable[int]]:
+        if isinstance(token, int):
             raise TypeError(f'use {self.__class__.__name__}.__getitem__ instead')
-        if isinstance(item, str):
-            return self._token_ix.get(item, self.unk)
-        return type(item)(self(item) for item in item)
+        if isinstance(token, str):
+            if token in self.token_index:
+                return self.token_index[token]
+            if hasattr(self, 'unk'):
+                return getattr(self, 'unk')
+            raise KeyError(f'{token} not found')
+        return type(token)(self(item) for item in token)
 
     @built_required
-    def __getitem__(self, item: Union[int, Iterable[int]]) -> Union[str, Iterable[str]]:
-        if isinstance(item, str):
+    def __getitem__(self, index: Union[int, Iterable[int]]) -> Union[str, Iterable[str]]:
+        if isinstance(index, str):
             raise TypeError(f'use {self.__class__.__name__}.__call__ instead')
-        if isinstance(item, int):
-            return self._ix_token[item]
-        return type(item)(self[item] for item in item)
+        if isinstance(index, int):
+            return self.index_token[index]
+        return type(index)(self[item] for item in index)
