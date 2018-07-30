@@ -1,6 +1,7 @@
 import enum
 from typing import List, Tuple, NoReturn
 
+from pathlib import Path
 from torch import optim
 from torch.utils.data import DataLoader
 from houttuynia.schedules.utils import apply_arguments
@@ -72,6 +73,10 @@ class Schedule(object):
         self.extensions: List[Tuple[Trigger, Extension]] = []
 
         self.iteration = 0
+
+    @property
+    def expt_dir(self) -> Path:
+        return self.monitor.expt_dir
 
     @property
     def global_step(self) -> int:
